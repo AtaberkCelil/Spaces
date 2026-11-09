@@ -42,6 +42,8 @@
 
 img, canvas { max-width: 100%; height: auto; display: block; }
 
+canvas { touch-action: none; }
+
 html, body { margin: 0; overflow-x: hidden; }
 
 /* flex/grid çocuklarının taşmasını engelle */
@@ -1088,10 +1090,34 @@ input[type="checkbox"] {
 }
 
 @media (max-width: 560px) {
-  .kapsa { padding: 12px 12px 28px; }
+  .kapsa { padding: 10px 10px 24px; }
   .ust-baslik h1 { font-size: 24px; }
   .bina-izgara { grid-template-columns: 1fr; }
   .mini-mudahale .btn { width: 100%; }
+  .kanvas-cerceve canvas { height: auto; max-height: 260px; }
+  .kanvas-cerceve.kisa canvas { max-height: 200px; }
+  .btn { font-size: 16px; padding: 12px 16px; min-height: 44px; }
+  .secenek { padding: 10px 12px; font-size: 14px; }
+  .secenek img { width: 40px; }
+  .arac-liste.kucuk .secenek img { width: 28px; }
+  .inis-hud { gap: 6px 14px; font-size: 12px; }
+  .rover-kontrol .btn { font-size: 13px; padding: 8px 12px; min-width: 80px; }
+  .gorev-liste { grid-template-columns: 1fr; }
+  .islem-dugmeleri .btn { font-size: 13px; padding: 9px 12px; }
+  .donanim { padding: 10px 12px; }
+  .donanim-baslik img { width: 32px; }
+  .cihaz-satir img { width: 24px; }
+  .kaynaklar { font-size: 12px; gap: 4px 14px; }
+  .kaynaklar span { gap: 6px; }
+  .durum { max-width: 100%; font-size: 11px; }
+  .tasarim-alt { flex-direction: column; align-items: stretch; gap: 10px; }
+  .tasarim-alt .btn { width: 100%; }
+  .brif-alt { flex-direction: column; align-items: stretch; gap: 10px; }
+  .brif-alt .btn { width: 100%; }
+  .rapor { max-width: 100%; }
+  .nota-buyuk { font-size: 44px; }
+  .rapor-tablo td { font-size: 12px; padding: 6px 4px; }
+  body { overflow-x: hidden; }
 }
 
 @media (prefers-reduced-motion: reduce) {
