@@ -1,294 +1,50 @@
 # MenSpace — Görev Tasarım Simülatörü
 
-NASA Space Apps mücadelesi için hazırlanmış, uçtan uca bir uzay görevi tasarlama oyunu.
-Fırlatma aracından bilim yüküne, fırlatma penceresinden inişe ve yüzey operasyonlarına
-kadar bütün kararların görevin sonucunu nasıl değiştirdiğini gösterir. Her görevde hedef
-gök cismi seçilir; çekim kuvveti farklı olduğu için iniş stratejisi de değişir.
-
-Her koşu **yeni bir görev brifingi** ile açılır: hedef, hedef gök cismi, süre, ortam
-koşulları ve ödül değişir. Aynı 10 sölü tekrar tekrar oynamak yerine her seferinde
-farklı bir mühendislik problemi çözersin.
+NASA Space Apps için hazırlanmış, uçtan uca bir uzay görevi tasarlama oyunu. Fırlatma aracından bilime, inişten yüzey operasyonlarına kadar her karar görev sonucunu etkiler.
 
 ## Çalıştırma
 
-Harici bağımlılık yok; üç dosya (`index.html`, `style.css`, `game.js`) tarayıcıda çalışır.
-
 ```bash
-# doğrudan aç
-xdg-open app/index.html
-
-# ya da yerel sunucu (file:// kısıtlarını kaldırmak için)
-python3 -m http.server 8899 --directory app
-# → http://localhost:8899
-```
-
-## Hedef gök cisimleri
-
-Görev brifingine rastgele bir hedef atanır; çekim kuvveti ve atmosfer inişi doğrudan
-etkiler, yüzey rengi ve cruise sahnesi buna göre değişir.
-
-| Hedef | Çekim (oyun) | Atmosfer | İniş zorluğu |
-|---|---|---|---|
-| Ay | 42 birim | yok | Hafif çekim, yumuşak iniş |
-| Mars | 50 birim | ince CO₂ | Daha ağır çekim, motor daha çok çalışır |
-| Merkür | 52 birim | yok | Atmosfer yok — düşüşü sadece motor kesiyor |
-| Venüs | 60 birim | yoğun CO₂ | Ağır çekim; her itki yakıt yakar |
-
-Çekim değerleri oyunun hız dengesi için ölçeklendirilmiştir; sırası gerçek hayat pullarına
-uygun verilmiştir (Venüs > Merkür ≈ Mars > Ay). `assets/jupiter.png` ise gaz devi için
-planlanan "uçuş görevi" modu için bekliyor (yüzeyi olmadığından iniş mekaniğine
-dahil edilmedi).
-
-
-## Official Challenge ve liderlik
-
-## Supabase ve hesap sistemi
-
-MenSpace Official Challenge skorları **Supabase Authentication** ile doğrulanır:
-
-- Kullanıcılar **Google ile giriş yapar**; resmi skor sadece hesaba işlenir.
-- Kayıt sırasında **benzersiz isim** seçilir; alınmakta olan isim kullanılamaz.
-- İsim istendiği gibi değiştirilebilir.
-- Display name ve skorlar **service role key** ile, sunucuda yürütülen replay doğrulamasından sonra yazılır.
-- Normal serbest görevler yerel rekor dışında hiçbir yere gitmez.
-
-### Kurulum
-
-1. Supabase projesi oluştur.
-2. Google’ı provider olarak aç (`Authentication → Providers → Google`).
-3. Yetkili redirect URI olarak `https://<project-ref>.supabase.co/auth/v1/callback` değerini Google Cloud Console’a koy.
-4. Authentication URL Configuration → Site URL = `https://nasaspaceapp.menemensogantutmuyor.workers.dev`; Redirect URLs’a yine bu adresi ekle.
-5. SQL editöründe `worker/supabase.sql` çalıştır. Yoksa aşağıdaki yapı kullanılır:
-   - `profiles`: `user_id`, `display_name`, `created_at`
-   - `official_scores`: `id`, `user_id`, `display_name`, `score`, `seconds`, `created_at`
-   - RLS açık; anonim kullanıcılar sadece `SELECT` yapabilir, `INSERT` herkese kapalı.
-6. Anahtarlar `.dev.vars` içinde saklanır, repoda paylaşılmaz:
-   - `SUPABASE_URL`
-   - `SUPABASE_ANON_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - `TURNSTILE_SECRET_KEY`
-   - `CHALLENGE_SECRET`
-
-### Önemli
-
-- `service_role` ne tarayıcıya ne de repoya girer.
-- Liderlik ekranı `LİDERLİK` düğmesinden açılır; hesap aç/kapat `HESAP` düğmesindedir.
-- Üstteki rekorlar sadece hesabına özgü değildir; tüm kullanıcılar görebilir.
-
-MenSpace’ta iki oyun modu vardır:
-
-- **Serbest görev:** her koşuda rastgele brifing/gök cismi; sonuç yalnızca yerel rekorlara yazılır.
-- **OFFICIAL CHALLENGE:** tek ve sabit `seed: 1337` ile oynanan resmi mod. Tüm oyunculara aynı görev verilir; sonuç yalnızca **Official Challenge liderlik tablosunda** gösterilir.
-
-### Nasıl güvence altına alınır?
-
-Official Challenge skoru **istemciye güvenmez**:
-
-1. Sunucu RAM üstüne bir `seed` ve tek kullanımlık challenge-id verir.
-2. Menü → Official Challenge → oynarsan tüm hamleler kaydedilir.
-3. Kaydet’te tarayıcı `actions` listesini sunucuya gönderir.
-4. Sunucu oyunu **aynı seed + hamle listesi** ile baştan simüle eder; skorunu sunucuda yeniden hesaplar.
-5. Turnstile ekstra bot koruması sağlar; IP hash ile saatlik 8 istek limiti vardır.
-6. `.dev.vars` ve Cloudflare secret’ları repoya eklenmez.
-
-Bu yüzden JS’i değiştirip “999999 puan” yazmak işe yaramaz; sunucu replay’i 999999’i değil gerçek skoru üretir.
-
-### Ne puana bile ekstra?
-
-Official Challenge’da sadece görev raporu tamamlandıktan sonra “Resmi Skoru Kaydet” düğmesi açılır. Skor, sunucuda oyunun yeniden oynatılmasıyla doğrulanır. Liderlik ekranı menüden `LİDERLİK` ile açılır.
-
-### Kurulum
-
-```bash
-# statik önizleme (kimlik doğrulama çalışmaz)
+# yerel önizleme (kimlik doğrulama çalışmaz)
 python3 -m http.server 8899 --directory app
 
-# tam geliştirme ortamı (Workers + yerel D1 + API)
+# tam geliştirme ortamı (Workers + D1)
 npx wrangler dev --port 8789
 ```
 
-Official Challenge sonuçları **yalnızca Supabase hesabına** kaydedilir; Google OAuth gerekir.
+## Oyun modları
 
-Cloudflare tarafında `worker/index.mjs` çalışır; statik dosyalar `./app` klasöründen `ASSETS` binding’i ile servis edilir. D1 veritabanı `menapp-scores` olarak tanımlıdır. `TURNSTILE_SECRET_KEY` ve `CHALLENGE_SECRET` gizli değerlerdir ve repoya eklenmez.
-
-## Oyunun akışı
-
-Oyun doğrudan bir **ana menüyle** açılır; oradan “Göreve Başla” ile brifing ekranına gidilir, seçtiğin görevle tasarım fazına geçilir.
-
-| Faz | Ne yaparsın | Neyi öğrenirsin |
-|---|---|---|
-| **Ana menü** | Oyunu menüden başlat, “Nasıl Oynanır”ı aç veya rekorlarına bak | Oyunun kontrol yolunu |
-| **Brifing** | Üç görevden birini seçersin | Hedefin, gök cisminin ve ortamın tasarımı nasıl değiştirdiği |
-| **Tasarım** | Fırlatma aracı, iniş modülü ve bilim yükünü seçersin | Bütçe, kütle, güç dengesi ve anten zorunluluğu |
-| **Fırlatma** | Pencere göstergesinde ateşleme zamanını yakalarsın | Araç güvenilirliği ve pencere genişliği arasındaki bağ |
-| **Seyir** | Yakıtı arabulucu atış için ayırıp ayırmayacağına karar verirsin | Yakıtın her fazın sigortası olduğu |
-| **İniş** | Hedef gök cisminin çekimine karşı düşüş ve yan hızı sınırların içinde tutarak iniş yaparsın | Yumuşak inişin yakıt–hassasiyet denklemi, her cismin çekimi farklı |
-| **Yüzey** | Söl boyunca enstrümanları çalıştırıp veriyi iletir, rover'ı sürerek veri, güç hücresi ve hammadde toplarsın | Gündüz/gece döngüsü, depolama, veri tamponu, olaylar, gezegenler arası keşif |
-| **Atölye** | Topladığın metal, kristal ve buzdan roket yükseltmeleri üretirsin | Yakıt dönüştürücü, yedek pil, motor ayarı, rover pil yükseltmesi |
-| **Rapor** | Not, puan ve brifing durumu | Hangi karar puanı yükseltti, hangisi bedel getirdi |
-
-## Görev brifingleri
-
-Her yeni görevde üç brifing seçilir (kolay / orta / zor). Hedefe ulaşırsan brifing
-ödülü rapor tablosuna eklenir.
-
-| Brifing | Hedef | Süre | Ödül |
-|---|---|---|---|
-| Derin Veri | 45 birim veri ilet | 8 söl | +20 |
-| Karanlığa Dayanıklı | 1 ay gecesini enerjisiz atlat | 8 söl | +20 |
-| Tam Enstrüman | 5 söl boyunca tüm enstrümanlar çalışsın | 10 söl | +30 |
-| Nokta Atışı | %80'den yüksek iniş hassasiyeti | 10 söl | +30 |
-| Ucuz Misyon | 12 M$ bütçe rezerve et | 10 söl | +30 |
-| Veri Avcısı | 95 birim veri ilet | 12 söl | +45 |
-| Çift Gece | 2 ay gecesini sorunsuz geç | 12 söl | +45 |
-| Çifte Hedef | 80 birim veri + 1 gece | 12 söl | +50 |
-
-### Ortam modifiyeleri
-
-Zorluk seviyesi arttıkça göreve ortam koşulları eklenir:
-
-| Modifiye | Etkisi |
-|---|---|
-| Toz Fırtınası | panel hasadı yarıya iner |
-| Regolit Tozu | panel hasadı her söl 3 birim azalır |
-| Radyo Karartması | her 3 sölün birinde iletim yarı kapasitede |
-| Soğuk Gece | pil kapasitesi %30 düşer |
-| Güneş Fırtınası | panel hasadı %50 artar, meteorit riski iki katına çıkar |
-| Sakin Uzay | meteorit yağmaz ama veri hedefi %25 yükselir |
-
-Yüzeyde her söl bir olay çekebilir: mikrometeorit, güneş patlaması, ay depremi,
-toz bulutu, anten arızası, pil sızıntısı.
-
-## Hangi eşyaları eklemeliyim?
-
-Genel kural: **önce anten, sonra güç, en son bilim cihazı.** Anten yoksa ürettiğin
-bilim Dünya'ya ulaşmaz; güç dengesizse cihazlar ilk sölün sonunda kapanır.
-
-| Eşya | Kütle | Maliyet | Etkisi | Ne zaman |
-|---|---|---|---|---|
-| Küçük Anten | 2 kg | 2 M$ | −1/söl, iletim 10 | Her görevde olmalı — veri hedefi olan brifinglerde şart |
-| Büyük Anten | 4 kg | 3 M$ | −2/söl, iletim 22 | 80+ birim hedeflerde, gün sayısı çok olan görevlerde |
-| Güneş Paneli | 3 kg | 3 M$ | +8/söl | Gece ve güç açığı olan her görevde |
-| Pil | 2 kg | 2 M$ | +60 birim depo | Pil olmadan 30 birimlik araç bataryası var — geceleri çoğu görevde bu yeter |
-| Kamera | 2 kg | 3 M$ | −1/söl, +6 bilim | Her zaman; en ucuz bilim |
-| Spektrometre | 4 kg | 5 M$ | −2/söl, +9 bilim | Veri hedefi yüksek görevlerde, yer var ve bütçe varsa |
-| Sismometre | 3 kg | 4 M$ | −1/söl, +5 bilim | Deprem bonusu + brifing "kesintisiz" hedefleri için |
-| Bayrak | 1 kg | 1 M$ | +2 bilim | Bütçe artarsa bedava 2 puan |
-
-### Brifinge göre önerilen kitler
-
-Tümü bütçe (44 M$) ve kütle kısıtları içinde doğrulanmıştır:
-
-| Brifing | Araç + modül | Eşyalar | Sonuç |
-|---|---|---|---|
-| Derin Veri | Yükseliş + Kelebek | Kamera, Küçük Anten, Panel, Pil | 14/24 kg · 30 M$ · +6/söl |
-| Karanlığa Dayanıklı | Yükseliş + Kasında | Panel, Pil, Küçük Anten, Sismometre | 19/24 kg · 33 M$ · +6/söl |
-| Tam Enstrüman | Yükseliş + Kelebek | Kamera, Spektrometre, Sismometre, Küçük Anten, Panel, Pil | 21/24 kg · 39 M$ · +20 bilim/söl |
-| Nokta Atışı | Sefer + Kasında | Kamera, Küçük Anten, Panel, Pil | 18/44 kg · 42 M$ · +6/söl |
-| Ucuz Misyon | Kıvılcım + Kelebek | Kamera, Küçük Anten, Panel | 12/12 kg · 20 M$ · +6/söl |
-| Veri Avcısı | Yükseliş + Kasında | Spektrometre, Büyük Anten, Panel, Pil, Bayrak | 23/24 kg · 36 M$ · +9/söl |
-| Çift Gece | Yükseliş + Kasında | 2× Panel, Pil, Büyük Anten, Sismometre | 24/24 kg · 37 M$ · +13/söl |
-| Çifte Hedef | Yükseliş + Kelebek | Kamera, Spektrometre, Büyük Anten, Panel, Pil, Bayrak | 21/24 kg · 37 M$ · +15/söl |
-
-Oyun tasarım ekranında da aynı öneri "Önerilen kit" rozetleriyle gösterilir; ekledikçe
-✓ işaretine döner.
-
-### Araç ve modül seçimi
-
-| Fırlatma aracı | Yük | Güvenilirlik | Fırlatma penceresi |
-|---|---|---|---|
-| Kıvılcım | 12 kg | %72 | %13 — dar, ama ucuz |
-| Yükseliş | 24 kg | %86 | %21 — denge noktası |
-| Sefer | 44 kg | %94 | %30 — en geniş pencere, en pahalı |
-
-| İniş modülü | Kütle | Yakıt | İtki |
-|---|---|---|---|
-| Kelebek | 5 kg | 34 | 150 — keskin ve hafif |
-| Kasında | 9 kg | 50 | 125 — bol yakıt, ağır itki |
-
-Güçlü fırlatma penceresini kaçırmamak için büyük araç, iniş hassasiyeti için hafif modül
-tercih edilir. Kasında'nın fazla yakıtı seyir fazında arabulucu atışı bedelsiz yapar.
+- **Serbest görev:** rastgele brifing ve hedef gök cismi; sonuç yalnızca yerel rekor (`localStorage`) olarak kaydedilir.
+- **Official Challenge:** sabit seed (`1337`) ile tüm oyunculara aynı görev verilir. Skor sunucu tarafında replay ile doğrulanır ve liderlik tablosunda gösterilir. Google OAuth gerekir.
 
 ## Kontroller
 
-- **Fırlatma:** `Boşluk` tuşu veya `FIRLAT` düğmesi (ilk tık geri sayımı başlatır, ikinci tık ateşler); `W` de aynı işlevi görür
-- **İniş:** `W`/`↑`/`Boşluk` = tam itki, `S`/`↓` = yarım itki, `A`/`←` ve `D`/`→` = yan itki; ekrana dokunmak tam itki verir
-- **Yüzey:** Enstrüman kutularını işaretle, `Sölü başlat` ile günü ilerlet, `Veriyi Dünya'ya gönder` ile tamponu boşalt
-- **Rover:** `A`/`←` geri, `D`/`→` ileri; ekrandaki `◀ geri` / `ileri ▶` düğmeleri dokunmatik için. Sürüş rover pilini harcar; yüzeydeki mavi veri kristalleri tampona veri, pil ikonları hem rover'a hem üsse güç ekler.
-- **Atölye:** Yüzeyde `Atölye · üretim` düğmesini aç. Rover ile topladığın metal, kristal ve buz kaynaklarını roket yükseltmelerine dönüştür.
-- **Gezegenler arası uçuş:** Yüzeyde `Gezegenler arası uçuş →` düğmesini aç, hedef seç. Her uçuş yakıt ve üs gücü harcar (gücü rover ile toplarsın) ve varışta +8 bilim keşif bonusu verir; yeni yüzeyde rover için taze veri ve güç hücreleri oluşur. Tampondaki iletilmemiş veri uçuşta kaybolur.
-
-### Rover ve güç kurtarma
-
-Rover'ın kendi pili 60 birimdir ve sürüşte azalır. Üs pili bittiğinde görev hemen kapanmaz:
-rover hâlâ hareket edebiliyorsa yüzeydeki güç hücrelerini toplayıp üsse güç taşıyabilirsin.
-Güç geldiğinde söl ilerletme yeniden açılır. Hem rover hem üs pili tükendiğinde görev enerji
-kaybıyla sonlanır.
-
-### Atölye: kaynak ve üretim
-
-Rover yüzeyde üç çeşit hammadde toplar — **metal**, **kristal** ve **buz**. Her söl yeni bir
-kaynak düğümü belirir, gezegen değiştirdiğinde yeni yüzeyde kaynaklar yenilenir. Kaynaklar
-ve kurulan yükseltmeler gezegenler arası uçuşta korunur.
-
-| Üretim | Malzeme | Etki |
-| --- | --- | --- |
-| **Yedek Pil** (tekrar edebilir) | 2 metal + 1 kristal | Üs gücü +25, rover pili +20; pil bitmiş üssü yeniden açar |
-| **Yakıt Dönüştürücü** (tek sefer) | 3 metal + 2 kristal + 2 buz | Atölyede `1 buz + 1 metal → 4 yakıt` dönüştürmeyi açar |
-| **Motor Ayarı** (tek sefer) | 2 metal + 2 kristal | İniş itkisinde yakıt tüketimi %20 azalır |
-| **Rover Pil Yükseltmesi** (tek sefer) | 2 metal + 2 buz | Rover pil kapasitesi +30 ve tam şarj |
-
-Yakıtın bittiğinde dönüştürücü kurup buz + metal yakıt üretebilirsin; yedek pil ise üs
-enerjisi tükenen görevi yeniden açık tutar.
-
-### Yeni görseller (çizilecek dosyalar)
-
-Oyun, bu dosyalar yoksa renkli yedek şekillerle çalışmaya devam eder. Çizimler
-`app/assets/` klasörüne PNG olarak konmalı:
-
-| Dosya | Boyut | İçerik |
-| --- | --- | --- |
-| `kaynak_metal.png` | 64×64 | Metal hurda yığını / cıvata |
-| `kaynak_kristal.png` | 64×64 | Turkuaz kristal kümesi |
-| `kaynak_buz.png` | 64×64 | Soluk mavi buz bloğu |
-| `uretim_pil.png` | 128×128 | Yedek pil ikonu |
-| `uretim_donusturucu.png` | 128×128 | Yakıt dönüştürücü makinesi |
-| `uretim_metal.png` | 128×128 | Motor ayarı / metal dişlisi ikonu |
-| `uretim_roverpil.png` | 128×128 | Rover pil yükseltmesi ikonu |
-
-## Puanlama
-
-Puan; fırlatma pencere hassasiyeti, iniş bölgesi hassasiyeti, toplanan bilim, bütçe
-ekonomisi ve tutturulan brifing ödülünden oluşur. En yüksek not `S`. Rekor tarayıcıda
-`localStorage`'da tutulur.
-
-## Katkı / deploy
-
-MenSpace, statik bir site olarak barındırılır. `wrangler.jsonc` dosyasındaki
-`assets.directory` yolu `./app` klasörüne (site kök dizinine) işaret eder.
-
-```bash
-python3 -m http.server 8899 --directory app   # yerel önizleme
-npx wrangler deploy                            # Cloudflare Workers (statik assets)
-```
+| İşlem | Tuş |
+|---|---|
+| Fırlatma | `Boşluk` / `W` / `FIRLAT` |
+| İniş (tam itki) | `W` / `↑` / `Boşluk` |
+| İniş (yarım itki) | `S` / `↓` |
+| İniş (yan itki) | `A` / `←` , `D` / `→` |
+| Yüzey | Enstrümanları işaretle, `Sölü başlat`, `Veriyi Dünya'ya gönder` |
+| Rover | `A` / `←` geri, `D` / `→` ileri |
 
 ## Yapı
 
 ```
 app/
   index.html   arayüz iskeleti (7 ekran)
-  style.css    tasarım dili: kağıt/mürekkep paleti, defter estetiği
-  game.js      oyun durumu, fazlar, brifing üretimi, canvas çizimi, ses (WebAudio)
-  assets/      çizimler (PNG)
+  style.css    tasarım dili (kağıt/mürekkep paleti)
+  game.js      oyun durumu, fazlar, brifing, canvas çizimi, ses
+  assets/      PNG çizimler (64×64 / 128×128)
+worker/
+  index.mjs    Cloudflare Workers (auth, leaderboard, challenge API)
 ```
 
 Teknik: saf HTML/CSS/JS + Canvas 2D, harici kütüphane veya build adımı yok.
 
 ## Katkı
 
-Projeye kod, çizim, belge veya fikirle katkıda bulunabilirsiniz. Ayrıntılar için [`CONTRIBUT.md`](CONTRIBUT.md) dosyasına bakın.
-
-Özet: yeni bir gezegen, brifing, donanım veya atölye tarifi eklemek için ilgili diziyi `game.js`'de düzenleyin; yeni bir varlık için `app/assets/` içine şeffaf PNG koyun. Kod değişiklikleri `node --check` ile test edilmeli ve replay deterministik kalmalıdır.
+Yeni gezegen, brifing, donanım veya atölye tarifi eklemek için ilgili diziyi `game.js`'de düzenleyin; yeni varlık için `app/assets/` içine şeffaf PNG koyun. Kod değişiklikleri `node --check` ile test edilmeli ve replay deterministik kalmalıdır.
 
 ## Lisans
 
