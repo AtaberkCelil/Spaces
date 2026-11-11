@@ -173,7 +173,11 @@ const verifyTurnstile = async (secret, token, remoteIp) => {
   });
   if (!res.ok) return false;
   const data = await res.json().catch(() => ({}));
-  return Boolean(data && data.success);
+  if (data && data.success) return true;
+  const kodlar = Array.isArray(data["error-codes"]) ? data["error-codes"].join(", ") : "";
+  console.warn("turnstile siteverify reddi:", kodlar || "bilinmeyen");
+  verifyTurnstile.sonKodlar = kodlar;
+  return false;
 };
 const countRateLimit = async (env, ipHash, bucket) => {
   const row = await env.DB.prepare(
@@ -252,7 +256,11 @@ export default {
 
       const remoteIp = request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for") || "";
       const turnstileOk = env.TURNSTILE_BYPASS === "true" ? true : await verifyTurnstile(env.TURNSTILE_SECRET_KEY, turnstile, remoteIp);
-      if (!turnstileOk) return errorJson("turnstile rejected", 403);
+      if (!turnstileOk) {
+        const kodlar = verifyTurnstile.sonKodlar || "";
+        verifyTurnstile.sonKodlar = "";
+        return errorJson("turnstile rejected" + (kodlar ? " (" + kodlar + ")" : ""), 403);
+      }
 
       const ipHash = await sha256(`${remoteIp}:${env.CHALLENGE_SECRET}`);
       const bucket = Math.floor(Date.now() / 3_600_000);

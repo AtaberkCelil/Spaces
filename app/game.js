@@ -3020,7 +3020,13 @@ async function saveOfficialScore() {
       }),
     });
     const data = await res.json();
-    if (!res.ok) { setAuthMessage(data.error || t("Kayıt reddedildi.")); return; }
+    if (!res.ok) {
+      setAuthMessage(data.error || t("Kayıt reddedildi."));
+      pendingLeaderboardToken = "";
+      if (window.turnstile) window.turnstile.reset();
+      updateOfficialButtons();
+      return;
+    }
     setAuthMessage(t("Skor kaydedildi."));
     pendingLeaderboardToken = "";
     if (window.turnstile) window.turnstile.reset();
