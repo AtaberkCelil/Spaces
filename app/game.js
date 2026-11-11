@@ -243,6 +243,10 @@ const EN = {
   "suya iniş": "splashdown", "dalgada süzülüyor": "bobbing on the waves",
   "rapor hazır": "report ready",
   "Dünya'ya dönüş — okyanus inişi": "Return to Earth — ocean splashdown",
+  "dönüş kalkışı": "return liftoff",
+  "yörüngeye ulaşıldı": "orbit reached",
+  "Dünya'ya yolculuk": "coast to Earth",
+  "Dünya'ya dönüş — kalkış": "Return to Earth — liftoff",
   "görev tamamlandı": "mission complete", "görev kaybı": "mission lost",
   "Görev tamamlandı. Not {0}, toplam puan {1}.{2}": "Mission complete. Grade {0}, total score {1}.{2}",
   " Brifing tutturuldu: ": " Briefing achieved: ", " Brifing tutmadı: ": " Briefing missed: ",
@@ -1633,15 +1637,159 @@ function inisCiz(dt) {
 function donusGec() {
   ekranAc("donus");
   const d = G.donus;
-  d.durum = "dusus"; d.t = 0;
-  d.x = 380 + rast(-70, 70);
-  d.y = -50; d.vy = 190; d.para = 0; d.atisma = 0; d.bitirdi = false;
+  d.durum = "kalkis"; d.t = 0; d.stt = 0;
+  d.x = 440; d.y = 0; d.vy = 0; d.para = 0; d.atisma = 0; d.bitirdi = false; d.yatik = 0;
   const btn = $("#btn-rapor-ac");
   if (btn) btn.hidden = true;
   const durum = $("#donus-durum");
-  if (durum) durum.textContent = t("yeniden giriş");
-  saatGuncelle(t("Dünya'ya dönüş — okyanus inişi"));
+  if (durum) durum.textContent = t("dönüş kalkışı");
+  saatGuncelle(t("Dünya'ya dönüş — kalkış"));
   kaynakGuncelle();
+}
+
+const DONUS_GEZEGEN_RENK = {
+  ay: "#8A8D99", mars: "#A0522D", merkur: "#8A8578", venus: "#C9A227",
+};
+
+function donusKalkisCiz(ctx, w, h, d) {
+  yildizOrgu(ctx, w, h);
+  const zeminY = h - 90;
+  yuzeySeridi(ctx, zeminY, w, G.hedef.zemin);
+  $("#donus-vy").textContent = Math.round(d.stt * 170 * 0.4);
+  const im = resim(G.arac ? G.arac.anahtar : "ay");
+  const boy = 150;
+  const g = im && im.complete && im.naturalWidth ? boy * (im.naturalWidth / im.naturalHeight) : boy;
+  const yuk = Math.min(500, d.stt * 170);
+  const ry = zeminY - boy + 24 - yuk;
+  if (im && im.complete) {
+    ctx.drawImage(im, d.x - g / 2, ry, g, boy);
+    panelKanatlari(ctx, d.x, g, ry + boy, boy);
+    ctx.fillStyle = "#F2C130";
+    ctx.beginPath();
+    ctx.moveTo(d.x - 9, ry + boy);
+    ctx.lineTo(d.x + 9, ry + boy);
+    ctx.lineTo(d.x, ry + boy + 28 + rng() * 14);
+    ctx.fill();
+  } else {
+    ctx.fillStyle = "#f2f0e6";
+    ctx.fillRect(d.x - 8, ry, 16, boy);
+    ctx.fillStyle = "#F2C130";
+    ctx.beginPath();
+    ctx.moveTo(d.x - 9, ry + boy);
+    ctx.lineTo(d.x + 9, ry + boy);
+    ctx.lineTo(d.x, ry + boy + 28 + rng() * 14);
+    ctx.fill();
+  }
+  // kalkış tozu
+  if (d.stt < 1.2) {
+    ctx.fillStyle = "rgba(182, 179, 159, " + (0.5 - d.stt * 0.3).toFixed(3) + ")";
+    ctx.beginPath();
+    ctx.ellipse(d.x, zeminY + 12, 40 + d.stt * 140, 18 + d.stt * 30, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  if (d.stt > 3) {
+    d.durum = "yorunge"; d.stt = 0;
+    const durum = $("#donus-durum");
+    if (durum) durum.textContent = t("yörüngeye ulaşıldı");
+  }
+}
+
+function donusYorungeCiz(ctx, w, h, d) {
+  yildizOrgu(ctx, w, h);
+  const gx = 200, gy = h + 130, gr = 270;
+  ctx.fillStyle = DONUS_GEZEGEN_RENK[G.hedef.anahtar] || "#7a5c43";
+  ctx.beginPath();
+  ctx.arc(gx, gy, gr, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "rgba(5, 7, 15, 0.35)";
+  ctx.beginPath();
+  ctx.arc(gx - gr * 0.25, gy - gr * 0.15, gr, 0, Math.PI * 2);
+  ctx.fill();
+  // yörünge izi
+  ctx.strokeStyle = "rgba(74, 208, 227, 0.35)";
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([5, 7]);
+  ctx.beginPath();
+  ctx.arc(gx, gy, gr + 64, -Math.PI * 0.95, Math.PI * 0.15);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  // kapsül yörüngede süzülür
+  const aci = -Math.PI * 0.85 + d.stt * 1.05;
+  const ox = gx + Math.cos(aci) * (gr + 64);
+  const oy = gy + Math.sin(aci) * (gr + 64);
+  ctx.save();
+  ctx.translate(ox, oy);
+  ctx.rotate(aci + Math.PI / 2);
+  ctx.fillStyle = "#f2f0e6";
+  ctx.beginPath();
+  ctx.moveTo(0, -12);
+  ctx.quadraticCurveTo(13, -4, 9, 10);
+  ctx.quadraticCurveTo(0, 14, -9, 10);
+  ctx.quadraticCurveTo(-13, -4, 0, -12);
+  ctx.fill();
+  ctx.fillStyle = "#F2C130";
+  ctx.fillRect(-9, 1, 18, 4);
+  ctx.restore();
+  $("#donus-vy").textContent = "0";
+  if (d.stt > 2.4) {
+    d.durum = "yolculuk"; d.stt = 0;
+    const durum = $("#donus-durum");
+    if (durum) durum.textContent = t("Dünya'ya yolculuk");
+  }
+}
+
+function donusYolculukCiz(ctx, w, h, d) {
+  yildizOrgu(ctx, w, h);
+  const p = Math.min(1, d.stt / 3);
+  // terk edilen gezegen sol altta küçülür
+  const gx = 130 - p * 40, gy = h - 90 + p * 50, gr = 46 * (1 - p * 0.72);
+  ctx.fillStyle = DONUS_GEZEGEN_RENK[G.hedef.anahtar] || "#7a5c43";
+  ctx.beginPath();
+  ctx.arc(gx, gy, Math.max(6, gr), 0, Math.PI * 2);
+  ctx.fill();
+  // Dünya sağ üstte büyür
+  const ex = w - 130 + p * 36, ey = 110 - p * 46, er = 24 + p * 52;
+  const gl = ctx.createRadialGradient(ex, ey, er * 0.4, ex, ey, er * 2.1);
+  gl.addColorStop(0, "rgba(74, 208, 227, 0.35)");
+  gl.addColorStop(1, "rgba(74, 208, 227, 0)");
+  ctx.fillStyle = gl;
+  ctx.beginPath();
+  ctx.arc(ex, ey, er * 2.1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#2c5f7c";
+  ctx.beginPath();
+  ctx.arc(ex, ey, er, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "rgba(242, 240, 230, 0.8)";
+  ctx.beginPath();
+  ctx.ellipse(ex - er * 0.3, ey - er * 0.25, er * 0.55, er * 0.2, -0.4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(ex + er * 0.25, ey + er * 0.3, er * 0.4, er * 0.15, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  // kapsül eğri yol üzerinde
+  const cx = gx + (ex - gx) * p;
+  const cy = gy + (ey - gy) * p - Math.sin(p * Math.PI) * 64;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(Math.PI / 4);
+  ctx.fillStyle = "#f2f0e6";
+  ctx.beginPath();
+  ctx.moveTo(0, -10);
+  ctx.quadraticCurveTo(11, -3, 8, 9);
+  ctx.quadraticCurveTo(0, 12, -8, 9);
+  ctx.quadraticCurveTo(-11, -3, 0, -10);
+  ctx.fill();
+  ctx.restore();
+  $("#donus-vy").textContent = Math.round(p * 11);
+  if (d.stt > 3) {
+    d.durum = "dusus"; d.stt = 0;
+    d.x = 380 + rast(-70, 70);
+    d.y = -50; d.vy = 190; d.para = 0;
+    const durum = $("#donus-durum");
+    if (durum) durum.textContent = t("yeniden giriş");
+    saatGuncelle(t("Dünya'ya dönüş — okyanus inişi"));
+  }
 }
 
 function donusKapsulCiz(ctx, d) {
@@ -1720,6 +1868,11 @@ function donusCiz(dt) {
   const w = c.width, h = c.height;
   const d = G.donus;
   d.t += dt;
+  d.stt = (d.stt || 0) + dt;
+
+  if (d.durum === "kalkis") { donusKalkisCiz(ctx, w, h, d); return; }
+  if (d.durum === "yorunge") { donusYorungeCiz(ctx, w, h, d); return; }
+  if (d.durum === "yolculuk") { donusYolculukCiz(ctx, w, h, d); return; }
 
   const hedefDeniz = h - 150;
   const irtifa = Math.max(0, hedefDeniz - d.y);
@@ -1863,8 +2016,7 @@ function donusKur() {
   if (c) c.addEventListener("pointerdown", (e) => {
     e.preventDefault();
     if (G.faz !== "donus") return;
-    if (G.donus.durum === "dusus") return; // iniş sürerken atlanamaz
-    donusBitir();
+    donusBitir(); // her aşamada atlanabilir
   });
 }
 
