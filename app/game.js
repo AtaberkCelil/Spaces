@@ -232,6 +232,17 @@ const EN = {
   " yolculuğu — ": " voyage — ", " yakıt, ": " fuel, ", " güç harcandı": " power spent",
   /* rapor */
   "MenSpace — Görev Raporu": "MenSpace — Mission Report",
+  "Atlatılan geceler": "Nights survived",
+  "Uzay hava olayları": "Space weather events",
+  " söl etkilenendi": " sols affected",
+  "Derin Uzay Ağı": "Deep Space Network",
+  " iletim": " transmissions",
+  "SÖL {0}": "SOL {0}",
+  "↑ {0} birim Dünya'ya iletildi": "↑ {0} units transmitted to Earth",
+  "yeniden giriş": "re-entry", "paraşüt açıldı": "parachute deployed",
+  "suya iniş": "splashdown", "dalgada süzülüyor": "bobbing on the waves",
+  "rapor hazır": "report ready",
+  "Dünya'ya dönüş — okyanus inişi": "Return to Earth — ocean splashdown",
   "görev tamamlandı": "mission complete", "görev kaybı": "mission lost",
   "Görev tamamlandı. Not {0}, toplam puan {1}.{2}": "Mission complete. Grade {0}, total score {1}.{2}",
   " Brifing tutturuldu: ": " Briefing achieved: ", " Brifing tutmadı: ": " Briefing missed: ",
@@ -465,6 +476,7 @@ function freshState() {
     firlatma: { durum: "hazir", t: 0, merkez: 0.5, hamle: null, dogruluk: 0 },
     seyir: { durum: "bekleme", t: 0, guvence: false },
     inis: { durum: "bekleme", lander: null, pad: 440, hassasiyet: 0, sayac: 0 },
+    donus: { durum: "bekleme", t: 0, x: 440, y: -40, vy: 120, para: 0, dalis: 0, raporBaslik: "", raporOzet: "" },
     yuzey: {
       sol: 1, pil: 0, pilKap: 0, tampon: 0, bilim: 0,
       aktif: new Set(), gunesKesik: false, bitti: false, pilBitti: false,
@@ -475,6 +487,7 @@ function freshState() {
       kaynaklar: { metal: 0, kristal: 0, buz: 0 },
       uretimler: new Set(),
       uzayHava: null, uzayHavaCarpan: 1,
+      kayitlar: [], iletisimler: [],
     },
   };
 }
@@ -1615,6 +1628,246 @@ function inisCiz(dt) {
   }
 }
 
+/* ============ DÜNYA'YA DÖNÜŞ (okyanus inişi) ============ */
+
+function donusGec() {
+  ekranAc("donus");
+  const d = G.donus;
+  d.durum = "dusus"; d.t = 0;
+  d.x = 380 + rast(-70, 70);
+  d.y = -50; d.vy = 190; d.para = 0; d.atisma = 0; d.bitirdi = false;
+  const btn = $("#btn-rapor-ac");
+  if (btn) btn.hidden = true;
+  const durum = $("#donus-durum");
+  if (durum) durum.textContent = t("yeniden giriş");
+  saatGuncelle(t("Dünya'ya dönüş — okyanus inişi"));
+  kaynakGuncelle();
+}
+
+function donusKapsulCiz(ctx, d) {
+  const im = resim("inis_aracı");
+  if (im && im.complete && im.naturalWidth) {
+    ctx.save();
+    ctx.translate(d.x, d.y);
+    ctx.rotate(d.yatik || 0);
+    ctx.drawImage(im, -24, -26, 48, 52);
+    ctx.restore();
+    return;
+  }
+  ctx.save();
+  ctx.translate(d.x, d.y);
+  ctx.rotate(d.yatik || 0);
+  ctx.fillStyle = "#f2f0e6";
+  ctx.beginPath();
+  ctx.moveTo(0, -20);
+  ctx.quadraticCurveTo(22, -6, 16, 18);
+  ctx.quadraticCurveTo(0, 26, -16, 18);
+  ctx.quadraticCurveTo(-22, -6, 0, -20);
+  ctx.fill();
+  ctx.fillStyle = "#f2c130";
+  ctx.fillRect(-16, 2, 32, 7);
+  ctx.fillStyle = "#23252f";
+  ctx.fillRect(-6, 18, 12, 8);
+  ctx.restore();
+}
+
+function donusParasutCiz(ctx, d) {
+  if (!d.para) return;
+  const s = Math.min(1, d.para);
+  ctx.save();
+  ctx.globalAlpha = 0.92;
+  ctx.fillStyle = "#f2c130";
+  ctx.strokeStyle = "#23252f";
+  ctx.lineWidth = 2;
+  const genis = 78 * s;
+  ctx.beginPath();
+  ctx.moveTo(d.x - genis / 2, d.y - 46);
+  ctx.quadraticCurveTo(d.x, d.y - 128 * s, d.x + genis / 2, d.y - 46);
+  ctx.quadraticCurveTo(d.x, d.y - 60, d.x - genis / 2, d.y - 46);
+  ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = "rgba(35, 37, 47, 0.9)";
+  ctx.beginPath();
+  ctx.moveTo(d.x - genis / 2 + 4, d.y - 44); ctx.lineTo(d.x - 8, d.y - 18);
+  ctx.moveTo(d.x + genis / 2 - 4, d.y - 44); ctx.lineTo(d.x + 8, d.y - 18);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function donusDenizCiz(ctx, w, h, d) {
+  const s1 = h - 150, s2 = h - 132;
+  for (const [taban, genlik, hiz, renk] of [
+    [s1, 7, 1.7, "#0e7d8c"],
+    [s2, 5, -2.3, "#4ad0e3"],
+    [h - 112, 4, 2.9, "#1a90a5"],
+  ]) {
+    ctx.fillStyle = renk;
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    for (let x = 0; x <= w; x += 12) {
+      const yd = taban + Math.sin(x * 0.02 + d.t * hiz) * genlik + Math.sin(x * 0.065 - d.t * hiz * 1.6) * genlik * 0.4;
+      ctx.lineTo(x, yd);
+    }
+    ctx.lineTo(w, h);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+function donusCiz(dt) {
+  const c = $("#donus-kanvas");
+  if (!c) return;
+  const ctx = c.getContext("2d");
+  const w = c.width, h = c.height;
+  const d = G.donus;
+  d.t += dt;
+
+  const hedefDeniz = h - 150;
+  const irtifa = Math.max(0, hedefDeniz - d.y);
+
+  // gökyüzü: yükseklik azaldıkça maviye döner
+  const derinlik = sinir(0, irtifa / (hedefDeniz + 60), 1);
+  const gOK = ctx.createLinearGradient(0, 0, 0, h);
+  gOK.addColorStop(0, "#05070f");
+  gOK.addColorStop(0.55 + 0.35 * (1 - derinlik), "#12203a");
+  gOK.addColorStop(1, derinlik < 0.35 ? "#2c5f7c" : "#0b1526");
+  ctx.fillStyle = gOK;
+  ctx.fillRect(0, 0, w, h);
+  if (derinlik > 0.25) {
+    ctx.globalAlpha = Math.min(0.9, (derinlik - 0.25) * 1.6);
+    yildizOrgu(ctx, w, h);
+    ctx.globalAlpha = 1;
+  }
+
+  // bulut şeritleri
+  ctx.fillStyle = "rgba(242, 240, 230, 0.10)";
+  for (let i = 0; i < 4; i++) {
+    const by = h * (0.18 + i * 0.14);
+    const bx = ((d.t * (14 + i * 9)) % (w + 240)) - 120;
+    ctx.beginPath();
+    ctx.ellipse(w - bx, by, 110 + i * 26, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  const s1 = h - 150;
+  const denizUst = s1 + Math.sin(0 + d.t * 1.7) * 7;
+
+  if (d.durum === "dusus") {
+    const cer = Math.min(dt, 0.05);
+    d.vy += 28 * cer;
+    if (!d.para && irtifa < hedefDeniz * 0.55) {
+      d.para = 0.01;
+      const durum = $("#donus-durum");
+      if (durum) durum.textContent = t("paraşüt açıldı");
+      ses("tik");
+    }
+    if (d.para) {
+      d.para = Math.min(1, d.para + cer * 2.2);
+      d.vy = Math.max(26, d.vy - 340 * cer * d.para);
+    }
+    d.y += d.vy * cer;
+    d.yatik = d.para ? Math.sin(d.t * 1.3) * 0.08 : 0;
+    d.x += Math.sin(d.t * 0.9) * 12 * cer;
+    if (d.y + 24 >= denizUst) {
+      d.durum = "atisma";
+      d.vy = 0;
+      d.y = denizUst - 8;
+      d.atisma = 0;
+      const durum = $("#donus-durum");
+      if (durum) durum.textContent = t("suya iniş");
+      ses("onay");
+    }
+  } else if (d.durum === "atisma") {
+    d.atisma += dt;
+    if (d.atisma > 1.2) {
+      d.durum = "dal";
+      d.atisma = 0;
+      const durum = $("#donus-durum");
+      if (durum) durum.textContent = t("dalgada süzülüyor");
+    }
+  } else if (d.durum === "dal") {
+    d.atisma += dt;
+    const dalga = Math.sin(d.x * 0.02 + d.t * 1.7) * 7;
+    d.y = denizUst + dalga * 0.35 - 6;
+    d.yatik = Math.cos(d.x * 0.02 + d.t * 1.7) * 0.12;
+    if (d.atisma > 3.6 && !d.bitirdi) {
+      d.bitirdi = true;
+      const btn = $("#btn-rapor-ac");
+      if (btn) btn.hidden = false;
+      const durum = $("#donus-durum");
+      if (durum) durum.textContent = t("rapor hazır");
+    }
+  }
+
+  $("#donus-vy").textContent = d.durum === "dusus" ? Math.round(d.vy * 0.4) : 0;
+
+  donusDenizCiz(ctx, w, h, d);
+  donusKapsulCiz(ctx, d);
+  donusParasutCiz(ctx, d);
+
+  if (d.durum !== "dusus") {
+    // dalgalara otur
+    ctx.save();
+    ctx.globalAlpha = 0.55;
+    ctx.fillStyle = "#4ad0e3";
+    ctx.beginPath();
+    ctx.ellipse(d.x, d.y + 20 + Math.sin(d.t * 3) * 2, 30, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    // çatlama halkaları
+    const sure = d.durum === "atisma" ? d.atisma : 1.2;
+    ctx.strokeStyle = "rgba(242, 240, 230, " + Math.max(0, 0.5 - sure * 0.4).toFixed(3) + ")";
+    ctx.lineWidth = 2;
+    for (let r = 0; r < 2; r++) {
+      const rr = 16 + (sure * 60 + r * 30) % 96;
+      ctx.beginPath();
+      ctx.ellipse(d.x, d.y + 22, rr, rr * 0.28, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+
+  // suya çarpma patlaması
+  if (d.durum === "atisma" && d.atisma < 0.9) {
+    const p = d.atisma;
+    ctx.fillStyle = "rgba(242, 240, 230, " + (0.85 - p).toFixed(3) + ")";
+    for (let i = 0; i < 14; i++) {
+      const aci = -Math.PI / 2 + (i - 6.5) * 0.16;
+      const mesafe = 20 + p * 90 * (0.6 + (i % 4) * 0.18);
+      const px = d.x + Math.cos(aci) * mesafe * 0.7;
+      const py = d.y + 20 + Math.sin(aci) * mesafe;
+      ctx.beginPath();
+      ctx.arc(px, py, 3.2 * (1 - p) + 1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = "rgba(74, 208, 227, " + (0.7 - p).toFixed(3) + ")";
+    ctx.beginPath();
+    ctx.moveTo(d.x - 14, d.y + 22);
+    ctx.quadraticCurveTo(d.x - 26, d.y + 22 - 70 * p, d.x - 20, d.y + 22);
+    ctx.moveTo(d.x + 14, d.y + 22);
+    ctx.quadraticCurveTo(d.x + 26, d.y + 22 - 70 * p, d.x + 20, d.y + 22);
+    ctx.fill();
+  }
+}
+
+function donusBitir() {
+  const d = G.donus;
+  if (d.durum === "bekleme") return;
+  d.durum = "bekleme";
+  d.bitirdi = false;
+  raporaGec(d.raporBaslik || t("söl tamamlandı"), d.raporOzet || "", "yuzey");
+}
+
+function donusKur() {
+  const c = $("#donus-kanvas");
+  const btn = $("#btn-rapor-ac");
+  if (btn) btn.addEventListener("click", () => { ses("tik"); donusBitir(); });
+  if (c) c.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    if (G.faz !== "donus") return;
+    if (G.donus.durum === "dusus") return; // iniş sürerken atlanamaz
+    donusBitir();
+  });
+}
+
 /* ============ ROVER ============ */
 const YUZEY_DUNYA_GENISLIK = 2600;
 const YUZEY_US_X = 300;
@@ -2265,6 +2518,7 @@ function solYurut() {
   const y = G.yuzey;
   if (y.bitti || y.pilBitti) return;
   const gunluk = [];
+  const kayitSol = y.sol;
   const gunduzMu = (y.sol - 1) % 6 !== 5;
   let geceMi = false;
   const kesikMi = y.gunesKesik;
@@ -2343,13 +2597,20 @@ function solYurut() {
   uzayHawaGuncelle();
   yuzeyCiz();
   $("#yuzey-gunluk").textContent = gunluk.join("\n") || t("Söl sessiz geçti.");
+  y.kayitlar.push({
+    sol: kayitSol,
+    gezegen: t(G.hedef.ad),
+    satirlar: gunluk.slice(),
+    olay: (y.uzayHawa && y.uzayHawa.sol === y.sol && y.uzayHawa.mesaj) ? t(y.uzayHawa.ad) + " · " + t(y.uzayHawa.yagis) : "",
+    olayMesaj: (y.uzayHawa && y.uzayHawa.sol === y.sol) ? y.uzayHawa.mesaj : "",
+  });
   kaynakGuncelle();
 
   const toplamSol = misyonSols();
   if (geceMi && y.pil > 0.001) y.geceler++;
   if (y.sol > toplamSol) {
     y.bitti = true;
-    raporYuzeyden(toplamSol + t(" söl tamamlandı"), t("Görev planının tamamı işletildi; kapsül raporu kapattı."));
+    raporYuzeyden(toplamSol + t(" söl tamamlandı"), t("Görev planının tamamı işletildi; kapsül raporu kapattı."), true);
   } else if (y.pil <= 0.001) {
     if (roverKurtarmaVar()) {
       y.pilBitti = true;
@@ -2391,6 +2652,7 @@ function veriIlet() {
   y.tampon -= giden;
   y.bilim += giden;
   y.iletilen += giden;
+  y.iletisimler.push({ sol: y.sol, gezegen: t(G.hedef.ad), giden: giden, karartma: karartmaVar });
   const anten = G.donanim.has("anten_b") ? DONANIM.find(d => d.anahtar === "anten_b") : DONANIM.find(d => d.anahtar === "anten_k");
   if (anten && y.pil >= anten.guc) y.pil -= anten.guc;
   ses("onay");
@@ -2485,10 +2747,16 @@ function transferBaslat(anahtar) {
   kaynakGuncelle();
 }
 
-function raporYuzeyden(baslik, ozet) {
+function raporYuzeyden(baslik, ozet, donusMu) {
   const y = G.yuzey;
   if (y.tampon > 0) y.bilim += Math.round(y.tampon * 0.5); // iletilmeyen verinin yarısı sayılır
   G.inis.durum = "bekleme";
+  if (donusMu && !(typeof window !== "undefined" && window.MENSPACE_REPLAY)) {
+    G.donus.raporBaslik = baslik;
+    G.donus.raporOzet = ozet;
+    donusGec();
+    return;
+  }
   raporaGec(baslik, ozet, "yuzey");
 }
 
@@ -2594,6 +2862,62 @@ function raporaGec(baslik, ozet, kaynak) {
     d.innerHTML = '<img src="assets/' + src + '" alt=""><span>' + label + '</span>';
     rozBox.appendChild(d);
   });
+
+  const iletimBox = $("#rapor-iletim");
+  const iletimListe = $("#rapor-iletim-liste");
+  const kayitBox = $("#rapor-kayit");
+  const kayitListe = $("#rapor-kayit-liste");
+  if (kaynak === "yuzey" && basarili && iletimBox && iletimListe && kayitBox && kayitListe) {
+    const y2 = G.yuzey;
+    iletimBox.hidden = false;
+    iletimListe.innerHTML = "";
+    const madde = (k, v) => {
+      const li = document.createElement("li");
+      li.innerHTML = "<b>" + k + "</b><span>" + v + "</span>";
+      iletimListe.appendChild(li);
+    };
+    const iletimSayisi = (y2.iletisimler || []).length;
+    if (gucHesapla().link) madde(t("Derin Uzay Ağı"), say(y2.iletilen, 0) + t(" birim") + (iletimSayisi ? " · " + iletimSayisi + t(" iletim") : ""));
+    else madde(t("Derin Uzay Ağı"), t("ANTEN YOK — veri Dünya'ya gönderilemiyor. Tasarım fazında bu bedel ödendi."));
+    madde(t("Toplanan bilim"), say(y2.bilim, 0) + t(" birim"));
+    if (y2.tampon > 0.001) madde(t("Kalan tampon"), say(y2.tampon, 0) + t(" birim (yarısı sayıldı)"));
+    if (y2.rover) madde(t("Rover keşfi"), say(y2.rover.veri, 0) + t(" birim veri · ") + say(y2.rover.mesafe, 0) + t(" m sürüş"));
+    if (y2.uretimler && y2.uretimler.size > 0) {
+      const adlar = [...y2.uretimler].map((a) => t((URETIMLER.find((u) => u.anahtar === a) || {}).ad || "")).filter(Boolean).join(", ");
+      madde(t("Atölye üretimi"), adlar);
+    }
+    if ((y2.gezegenSayisi || 1) > 1) madde(t("Gezegen ziyaretleri"), y2.gezegenSayisi + t(" gök cismi · keşif bonusları bilime dahil"));
+    if (y2.geceler) madde(t("Atlatılan geceler"), String(y2.geceler));
+    const olaylu = (y2.kayitlar || []).filter((k) => k.olay).length;
+    if (olaylu) madde(t("Uzay hava olayları"), olaylu + t(" söl etkilenendi"));
+
+    kayitBox.hidden = false;
+    kayitListe.innerHTML = "";
+    const iletimler = y2.iletisimler || [];
+    (y2.kayitlar || []).forEach((kayit) => {
+      const gun = document.createElement("div");
+      gun.className = "kayit-gun";
+      let icerik = '<div class="kayit-bas"><span class="kayit-sol">' + tf("SÖL {0}", kayit.sol) + "</span><span class=\"kayit-gezegen\">" + kayit.gezegen + "</span>" +
+        (kayit.olay ? '<span class="kayit-olay">' + kayit.olay + "</span>" : "") + "</div>";
+      if (kayit.olayMesaj) icerik += '<p class="kayit-olay-mesaj">' + kayit.olayMesaj + "</p>";
+      (kayit.satirlar || []).forEach((s) => { icerik += '<p class="kayit-satir">' + s + "</p>"; });
+      if (!(kayit.satirlar || []).length) icerik += '<p class="kayit-satir">' + t("Söl sessiz geçti.") + "</p>";
+      iletimler.filter((i) => i.sol === kayit.sol).forEach((i) => {
+        icerik += '<p class="kayit-iletim">' + tf("↑ {0} birim Dünya'ya iletildi", say(i.giden, 0)) + (i.karartma ? t(" (radyo karartması: yarı kapasite)") : "") + "</p>";
+      });
+      gun.innerHTML = icerik;
+      kayitListe.appendChild(gun);
+    });
+    iletimler.filter((i) => !(y2.kayitlar || []).some((k) => k.sol === i.sol)).forEach((i) => {
+      const gun = document.createElement("div");
+      gun.className = "kayit-gun";
+      gun.innerHTML = '<div class="kayit-bas"><span class="kayit-sol">' + tf("SÖL {0}", i.sol) + '</span><span class="kayit-gezegen">' + i.gezegen + '</span></div><p class="kayit-iletim">' + tf("↑ {0} birim Dünya'ya iletildi", say(i.giden, 0)) + "</p>";
+      kayitListe.appendChild(gun);
+    });
+  } else if (iletimBox && kayitBox) {
+    iletimBox.hidden = true;
+    kayitBox.hidden = true;
+  }
 
   const tb = $("#rapor-govde");
   tb.innerHTML = "";
@@ -3049,6 +3373,7 @@ function advanceGame(dt) {
   if (G.faz === "firlatma") firlatmaCiz(dt);
   else if (G.faz === "seyir") seyirCiz(dt);
   else if (G.faz === "inis") inisCiz(dt);
+  else if (G.faz === "donus") donusCiz(dt);
   else if (G.faz === "tasarim") tasarimCiz();
   else if (G.faz === "yuzey") { yuzeyGuncelle(dt); yuzeyCiz(); }
 }
@@ -3190,6 +3515,10 @@ function bagla() {
     G.yuzey.kesintisiz = 0;
     G.yuzey.kaynaklar = { metal: 0, kristal: 0, buz: 0 };
     G.yuzey.uretimler = new Set();
+    G.yuzey.kayitlar = [];
+    G.yuzey.iletisimler = [];
+    G.yuzey.gezegenSayisi = 1;
+    G.donus.durum = "bekleme";
     G.firlatma.dogruluk = 0;
     G.inis.hassasiyet = 0;
     G.brif = null;
@@ -3214,6 +3543,7 @@ function kur() {
   tasarimKur();
   inisTusKur();
   roverTusKur();
+  donusKur();
   bagla();
   G.misyonlar = misyonlariUret();
   misyonKartlariCiz();

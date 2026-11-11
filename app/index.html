@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
   <div class="kapsa">
@@ -194,6 +194,21 @@
         </div>
       </section>
 
+      <!-- DÜNYA'YA DÖNÜŞ -->
+      <section class="ekran" id="ekran-donus" aria-label="Dünya'ya dönüş">
+        <div class="kanvas-cerceve">
+          <canvas id="donus-kanvas" width="880" height="560" aria-label="Dünya okyanus inişi"></canvas>
+        </div>
+        <div class="inis-hud">
+          <span class="tabular" data-en="capsule speed <b id='donus-vy'>0</b> m/s">kapsül hızı <b id="donus-vy">0</b> m/s</span>
+          <span class="tabular" id="donus-durum" data-en="re-entry">yeniden giriş</span>
+          <span class="hud-ipucu" data-en="mission dossier arrives after splashdown">suya indikten sonra görev raporu gelir</span>
+        </div>
+        <div class="donus-alt">
+          <button class="btn ana" id="btn-rapor-ac" type="button" hidden data-en="Open mission dossier →">Görev raporunu aç →</button>
+        </div>
+      </section>
+
       <!-- YÜZEY -->
       <section class="ekran" id="ekran-yuzey" aria-label="yüzey operasyonları">
         <div class="kanvas-cerceve kisa">
@@ -279,6 +294,14 @@
             <tbody id="rapor-govde"></tbody>
           </table>
           <div class="rapor-rozetler" id="rapor-rozetler" hidden></div>
+          <div class="rapor-bolum" id="rapor-iletim" hidden>
+            <h3 data-en="TRANSMISSION SUMMARY · DATA SENT TO EARTH">DÜNYA'YA GİDEN VERİ ÖZETİ</h3>
+            <ul id="rapor-iletim-liste" class="rapor-iletim-liste"></ul>
+          </div>
+          <div class="rapor-bolum" id="rapor-kayit" hidden>
+            <h3 data-en="DAILY LOG · WHAT HAPPENED EACH SOL">GÜN GÜN KAYIT · O GÜN NE OLDU</h3>
+            <div id="rapor-kayit-liste" class="rapor-kayit-liste"></div>
+          </div>
           <div class="rapor-challenge" id="rapor-challenge" hidden>
             <p id="rapor-challenge-msg" data-en="This result enters the Official Challenge.">Bu sonuç Official Challenge’a girer.</p>
             <button class="btn ana" id="btn-lider-kaydet" type="button" data-en="Save Official Score →">Resmi Skoru Kaydet →</button>
@@ -351,6 +374,6 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-  <script type="module" src="game.js?v=11"></script>
+  <script type="module" src="game.js?v=12"></script>
 </body>
 </html>

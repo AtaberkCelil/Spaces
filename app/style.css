@@ -1592,6 +1592,99 @@ body {
 
 .rapor { max-width: 680px; margin: 24px auto 0; }
 
+.rapor-bolum {
+  border-top: 1px dashed var(--cizgi);
+  margin-top: 16px;
+  padding-top: 12px;
+}
+
+.rapor-bolum h3 {
+  font-family: var(--fm);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--murekkep-2);
+  margin: 0 0 10px;
+}
+
+.rapor-iletim-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.rapor-iletim-liste li {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 13px;
+  padding: 5px 8px;
+  background: rgba(242, 240, 230, 0.04);
+  border-left: 2px solid var(--teal);
+}
+
+.rapor-iletim-liste li b { font-weight: 600; color: var(--murekkep); white-space: nowrap; }
+.rapor-iletim-liste li span { color: var(--murekkep-2); text-align: right; font-family: var(--fm); font-size: 12px; }
+
+.rapor-kayit-liste {
+  max-height: 260px;
+  overflow-y: auto;
+  display: grid;
+  gap: 8px;
+  padding-right: 6px;
+}
+
+.kayit-gun {
+  border: 1px solid var(--cizgi);
+  background: rgba(242, 240, 230, 0.03);
+  padding: 8px 10px;
+}
+
+.kayit-bas { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+
+.kayit-sol {
+  font-family: var(--fd);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--sari);
+}
+
+.kayit-gezegen { font-size: 11px; color: var(--murekkep-2); letter-spacing: 0.06em; text-transform: uppercase; }
+
+.kayit-olay {
+  font-family: var(--fm);
+  font-size: 10px;
+  color: var(--cyan);
+  border: 1px solid rgba(74, 208, 227, 0.4);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.kayit-olay-mesaj {
+  margin: 6px 0 2px;
+  font-family: var(--fm);
+  font-size: 11px;
+  color: var(--cyan);
+}
+
+.kayit-satir { margin: 4px 0 0; font-size: 12.5px; color: var(--murekkep-2); }
+
+.kayit-iletim {
+  margin: 6px 0 0;
+  font-family: var(--fm);
+  font-size: 11px;
+  color: var(--sari);
+}
+
+/* ---------- Dünya'ya dönüş ---------- */
+.donus-alt { text-align: center; margin-top: 12px; }
+.donus-alt[hidden] { display: none; }
+#donus-kanvas { cursor: pointer; }
+
 .rapor h2 {
   font-family: var(--fd);
   font-size: 30px;
