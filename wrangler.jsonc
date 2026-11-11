@@ -4,8 +4,7 @@
   "main": "worker/index.mjs",
   "assets": {
     "directory": "./app",
-    "binding": "ASSETS",
-    "run_worker_first": true
+    "binding": "ASSETS"
   },
   "d1_databases": [
     {
