@@ -653,6 +653,48 @@ body {
   padding: 1px 0;
 }
 
+/* önerilen kit — opsiyonel katlanır liste */
+.onerilen-toggle {
+  display: inline-flex;
+  align-items: center;
+  margin: 2px 8px 2px;
+  padding: 3px 8px;
+  font-family: var(--fm);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.onerilen-toggle:hover { color: var(--cyan); }
+
+.onerilen-liste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 10px 6px;
+}
+
+.onerilen-chip {
+  font-family: var(--fm);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.onerilen-chip.var { color: var(--green); border-color: rgba(52, 211, 153, 0.35); }
+.onerilen-chip.var b { color: var(--green); }
+.onerilen-chip b { font-weight: 700; margin-right: 3px; }
+
 /* tasarım ekranı açıkken — tüm pencereyi kaplayan kokpit katmanı */
 #ekran-tasarim.acik {
   position: fixed;

@@ -250,6 +250,7 @@ const EN = {
   "başarılı iniş": "successful landing", "tam plan": "full plan", "100+ veri": "100+ data", "S sınıfı": "Class S",
   "MenSpace — görev tasarım simülatörü": "MenSpace — mission design simulator",
   "görev tasarım simülatörü": "mission design simulator",
+  "Önerilen kit": "Suggested kit",
   /* hesap / liderlik */
   "HESAP — giriş yap": "ACCOUNT — sign in",
   "Misafir": "Guest",
@@ -848,6 +849,39 @@ function brifKartiGuncelle() {
       modUl.appendChild(li);
     });
   }
+  onerilenGuncelle();
+}
+
+let onerilenAcik = false;
+
+function onerilenTogle() {
+  onerilenAcik = !onerilenAcik;
+  const kap = $("#onerilen-liste");
+  const btn = $("#btn-onerilen");
+  if (kap) kap.hidden = !onerilenAcik;
+  if (btn) btn.textContent = t("Önerilen kit") + " " + (onerilenAcik ? "▾" : "▸");
+  ses("tik");
+  if (onerilenAcik) onerilenGuncelle();
+}
+
+function onerilenGuncelle() {
+  const kap = $("#onerilen-liste");
+  if (!kap || !G.brif || !onerilenAcik) return;
+  kap.innerHTML = "";
+  const ekle = (ad, seciliMi) => {
+    const span = document.createElement("span");
+    span.className = "onerilen-chip " + (seciliMi ? "var" : "yok");
+    span.innerHTML = "<b>" + (seciliMi ? "✓" : "＋") + "</b> " + t(ad);
+    kap.appendChild(span);
+  };
+  const arac = ARACLAR.find((x) => x.anahtar === G.brif.arac);
+  const modul = MODULLER.find((x) => x.anahtar === G.brif.modul);
+  if (arac) ekle(arac.ad, G.arac === arac);
+  if (modul) ekle(modul.ad, G.modul === modul);
+  G.brif.onerilen.forEach((anahtar) => {
+    const d = DONANIM.find((x) => x.anahtar === anahtar);
+    if (d) ekle(d.ad, G.donanim.has(anahtar));
+  });
 }
 
 function brifDurumu() {
@@ -1024,6 +1058,7 @@ function tasarimDenetim() {
     btn.title = t("Tasarım onayı bekliyor: ") + sorunlar.join(" ");
   }
   tasarimCiz();
+  onerilenGuncelle();
 }
 
 function tasarimCiz() {
@@ -3087,6 +3122,9 @@ function bagla() {
   $("#btn-nasil-kapat").addEventListener("click", () => { $("#nasil").hidden = true; });
   pop("#btn-rekor", "#rekorlar-popup");
   $("#btn-rekorlar-kapat").addEventListener("click", () => { $("#rekorlar-popup").hidden = true; });
+
+  const oneBtn = $("#btn-onerilen");
+  if (oneBtn) oneBtn.addEventListener("click", onerilenTogle);
 
   const dilBtn = $("#btn-dil");
   if (dilBtn) {
