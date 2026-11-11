@@ -1059,7 +1059,7 @@ function tasarimCiz() {
 
   ctx.clearRect(0, 0, w, h);
 
-  const t = Date.now() * 0.001;
+  const zmn = Date.now() * 0.001;
 
   // derin uzay arka planı
   const grd = ctx.createLinearGradient(0, 0, 0, h);
@@ -1072,32 +1072,32 @@ function tasarimCiz() {
   // uzak yıldızlar (parallax katman 1)
   ctx.fillStyle = "rgba(200, 220, 255, 0.6)";
   for (let i = 0; i < 60; i++) {
-    const x = (i * 37 + t * 12) % w;
+    const x = (i * 37 + zmn * 12) % w;
     const y = (i * 53 + 100) % h;
-    ctx.globalAlpha = 0.4 + 0.6 * Math.sin(t + i);
+    ctx.globalAlpha = 0.4 + 0.6 * Math.sin(zmn + i);
     ctx.fillRect(x, y, 1.2, 1.2);
   }
 
   // orta yıldızlar (parallax katman 2)
   ctx.fillStyle = "rgba(34, 211, 238, 0.45)";
   for (let i = 0; i < 30; i++) {
-    const x = (i * 83 + t * 28) % w;
+    const x = (i * 83 + zmn * 28) % w;
     const y = (i * 71 + 40) % h;
-    ctx.globalAlpha = 0.3 + 0.5 * Math.sin(t * 0.7 + i * 2);
+    ctx.globalAlpha = 0.3 + 0.5 * Math.sin(zmn * 0.7 + i * 2);
     ctx.fillRect(x, y, 1.8, 1.8);
   }
 
   // büyük yıldızlar (parallax katman 3)
   ctx.fillStyle = "#fff";
   for (let i = 0; i < 12; i++) {
-    const x = (i * 157 + t * 45) % w;
+    const x = (i * 157 + zmn * 45) % w;
     const y = (i * 93 + 180) % h;
-    ctx.globalAlpha = 0.5 + 0.5 * Math.sin(t * 0.5 + i);
+    ctx.globalAlpha = 0.5 + 0.5 * Math.sin(zmn * 0.5 + i);
     ctx.fillRect(x, y, 2.5, 2.5);
   }
 
   // kayan yıldızlar
-  if (Math.floor(t * 60) % 110 === 0) {
+  if (Math.floor(zmn * 60) % 110 === 0) {
     G.tasarimYildizlar = G.tasarimYildizlar || [];
     G.tasarimYildizlar.push({ x: Math.random() * w, y: -10, vx: -2 + Math.random() * -3, vy: 3 + Math.random() * 4, life: 1 });
   }
@@ -1123,7 +1123,7 @@ function tasarimCiz() {
   ctx.beginPath();
   ctx.moveTo(0, zeminY);
   for (let x = 0; x <= w; x += 40) {
-    ctx.lineTo(x, zeminY + Math.sin(x * 0.02 + t * 0.1) * 12);
+    ctx.lineTo(x, zeminY + Math.sin(x * 0.02 + zmn * 0.1) * 12);
   }
   ctx.lineTo(w, h);
   ctx.lineTo(0, h);
@@ -1152,7 +1152,7 @@ function tasarimCiz() {
       const drawY = zeminY - aracBoy;
       ctx.save();
       ctx.translate(drawX + aracG / 2, drawY + aracBoy / 2);
-      ctx.scale(1, Math.abs(Math.sin(t * 0.5)) * 0.02 + 1);
+      ctx.scale(1, Math.abs(Math.sin(zmn * 0.5)) * 0.02 + 1);
       ctx.translate(-(drawX + aracG / 2), -(drawY + aracBoy / 2));
       ctx.drawImage(im, drawX, drawY, aracG, aracBoy);
       ctx.restore();
