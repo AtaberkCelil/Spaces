@@ -848,27 +848,6 @@ function brifKartiGuncelle() {
       modUl.appendChild(li);
     });
   }
-  onerilenGuncelle();
-}
-
-function onerilenGuncelle() {
-  const kap = $("#onerilen-liste");
-  if (!kap || !G.brif) return;
-  kap.innerHTML = "";
-  const ekle = (ad, seciliMi) => {
-    const span = document.createElement("span");
-    span.className = "onerilen-chip " + (seciliMi ? "var" : "yok");
-    span.innerHTML = "<b>" + (seciliMi ? "✓" : "＋") + "</b> " + ad;
-    kap.appendChild(span);
-  };
-  const arac = ARACLAR.find((x) => x.anahtar === G.brif.arac);
-  const modul = MODULLER.find((x) => x.anahtar === G.brif.modul);
-  if (arac) ekle(arac.ad, G.arac === arac);
-  if (modul) ekle(modul.ad, G.modul === modul);
-  G.brif.onerilen.forEach((anahtar) => {
-    const d = DONANIM.find((x) => x.anahtar === anahtar);
-    if (d) ekle(d.ad, G.donanim.has(anahtar));
-  });
 }
 
 function brifDurumu() {
@@ -1045,7 +1024,6 @@ function tasarimDenetim() {
     btn.title = t("Tasarım onayı bekliyor: ") + sorunlar.join(" ");
   }
   tasarimCiz();
-  onerilenGuncelle();
 }
 
 function tasarimCiz() {

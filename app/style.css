@@ -363,10 +363,6 @@ body {
   white-space: nowrap;
 }
 
-.gorev-zorluk.z1 { background: #DCEDE2; color: #101424; border-color: #DCEDE2; }
-.gorev-zorluk.z2 { background: var(--sari); color: #101424; border-color: var(--sari); }
-.gorev-zorluk.z3 { background: #C0392B; color: #f2f0e6; border-color: #C0392B; }
-
 .gorev-ad {
   font-family: var(--fd);
   font-size: 16px;
@@ -479,41 +475,6 @@ body {
   line-height: 1.6;
   color: var(--murekkep-2);
 }
-
-.onerilen {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  flex-wrap: wrap;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  padding-top: 8px;
-}
-
-.onerilen-baslik {
-  font-family: var(--fm);
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--murekkep-2);
-}
-
-.onerilen-liste { display: flex; gap: 6px; flex-wrap: wrap; }
-
-.onerilen-chip {
-  font-family: var(--fm);
-  font-size: 11px;
-  border: 2px solid var(--murekkep);
-  border-radius: 20px;
-  padding: 1px 9px;
-  background: var(--kagit);
-}
-
-.onerilen-chip b { font-weight: 700; }
-.onerilen-chip.var { background: #DCEDE2; }
-.onerilen-chip.var b { color: var(--teal); }
-.onerilen-chip.yok { border-style: none; color: var(--murekkep-2); }
-.onerilen-chip.yok b { color: var(--damga); }
 
 .brif-ilerleme { color: var(--teal); font-weight: 600; }
 .brif-ilerleme.tamam { color: var(--teal); }
@@ -636,7 +597,7 @@ body {
   right: 324px;
   z-index: 20;
   margin: 0;
-  padding: 14px 16px;
+  padding: 10px 14px;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 12px;
@@ -645,6 +606,51 @@ body {
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(34, 211, 238, 0.35) transparent;
+}
+
+/* kart içi sıkılaştırma — yüksekliği küçült */
+#brif-kart .brif-ust {
+  padding: 6px 8px;
+  gap: 10px;
+}
+
+#brif-kart .brif-ust h3 {
+  font-size: 15px;
+}
+
+#brif-kart .gorev-kod {
+  padding: 0 6px;
+}
+
+#brif-kart .gorev-zorluk {
+  padding: 3px 10px;
+}
+
+#brif-kart .brif-hedef {
+  margin: 4px 8px 2px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+#brif-kart .brif-gok-cisim {
+  gap: 10px;
+  margin: 4px 8px 6px;
+  padding: 6px 10px;
+}
+
+#brif-kart .brif-gok-cisim img {
+  width: 26px;
+  height: 26px;
+}
+
+#brif-kart .brif-modlar {
+  margin: 0 8px 4px;
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+#brif-kart .brif-modlar li {
+  padding: 1px 0;
 }
 
 /* tasarım ekranı açıkken — tüm pencereyi kaplayan kokpit katmanı */
@@ -884,7 +890,6 @@ body {
   padding: 5px 12px;
   border-radius: 999px;
   white-space: nowrap;
-  animation: pulse-zorluk 2.5s ease-in-out infinite;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.08);
 }
@@ -954,57 +959,6 @@ body {
 .brif-modlar li {
   padding: 2px 0;
   border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-
-.onerilen {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px 16px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-}
-
-.onerilen-baslik {
-  font-family: var(--fm);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #94a3b8;
-}
-
-.onerilen-liste {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.onerilen-chip {
-  font-family: var(--fm);
-  font-size: 10px;
-  font-weight: 600;
-  padding: 6px 12px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  color: #cbd5e1;
-  cursor: pointer;
-  transition: all 150ms ease-out;
-  white-space: nowrap;
-}
-
-.onerilen-chip:hover {
-  color: var(--cyan);
-}
-
-.onerilen-chip.var {
-  color: var(--green);
-}
-
-.onerilen-chip.yok {
-  color: #64748b;
 }
 
 /* seçenek kartları — araç / modül */
@@ -2359,19 +2313,6 @@ body {
 .gorev-zorluk.z3 { color: var(--orange); }
 
 .brif-gok-cisim { color: var(--murekkep-2); }
-
-.onerilen-chip {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  color: var(--murekkep-2);
-  padding: 6px 12px;
-}
-
-.onerilen-chip.var { border-color: var(--green); color: var(--green); }
-.onerilen-chip.var b { color: var(--green); }
-.onerilen-chip.yok { border-style: none; color: #64748b; }
-.onerilen-chip.yok b { color: #ff8a7a; }
 
 .brif-ilerleme { color: var(--murekkep); }
 .brif-ilerleme.tamam { color: #7ce0a3; }
