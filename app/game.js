@@ -247,6 +247,12 @@ const EN = {
   "yörüngeye ulaşıldı": "orbit reached",
   "Dünya'ya yolculuk": "coast to Earth",
   "Dünya'ya dönüş — kalkış": "Return to Earth — liftoff",
+  "Dünya karşıda": "Earth ahead",
+  "Dünya karşıda. Nasıl gireceğiz?": "Earth is ahead. How do we go in?",
+  "Yörüngeye gir — yavaş iniş": "Enter orbit — slow descent",
+  "Bodoslama — direkt giriş": "Headfirst — direct entry",
+  "yörüngede frenleme": "aerobraking in orbit",
+  "bodoslama — yüksek hız": "headfirst — high speed",
   "görev tamamlandı": "mission complete", "görev kaybı": "mission lost",
   "Görev tamamlandı. Not {0}, toplam puan {1}.{2}": "Mission complete. Grade {0}, total score {1}.{2}",
   " Brifing tutturuldu: ": " Briefing achieved: ", " Brifing tutmadı: ": " Briefing missed: ",
@@ -1638,18 +1644,126 @@ function donusGec() {
   ekranAc("donus");
   const d = G.donus;
   d.durum = "kalkis"; d.t = 0; d.stt = 0;
-  d.x = 440; d.y = 0; d.vy = 0; d.para = 0; d.atisma = 0; d.bitirdi = false; d.yatik = 0;
+  d.x = 440; d.y = 0; d.vy = 0; d.para = 0; d.atisma = 0; d.bitirdi = false; d.yatik = 0; d.secim = null;
   const btn = $("#btn-rapor-ac");
   if (btn) btn.hidden = true;
+  const secim = $("#donus-secim");
+  if (secim) secim.hidden = true;
   const durum = $("#donus-durum");
   if (durum) durum.textContent = t("dönüş kalkışı");
   saatGuncelle(t("Dünya'ya dönüş — kalkış"));
   kaynakGuncelle();
 }
 
+function donusSecimAc() {
+  const secim = $("#donus-secim");
+  if (secim) secim.hidden = false;
+  const durum = $("#donus-durum");
+  if (durum) durum.textContent = t("Dünya karşıda");
+}
+
 const DONUS_GEZEGEN_RENK = {
   ay: "#8A8D99", mars: "#A0522D", merkur: "#8A8578", venus: "#C9A227",
 };
+
+function donusDunyaCiz(ctx, ex, ey, er) {
+  const im = resim("dunya");
+  if (im && im.complete && im.naturalWidth) {
+    ctx.drawImage(im, ex - er, ey - er, er * 2, er * 2);
+    return;
+  }
+  const gl = ctx.createRadialGradient(ex, ey, er * 0.4, ex, ey, er * 2.1);
+  gl.addColorStop(0, "rgba(74, 208, 227, 0.35)");
+  gl.addColorStop(1, "rgba(74, 208, 227, 0)");
+  ctx.fillStyle = gl;
+  ctx.beginPath();
+  ctx.arc(ex, ey, er * 2.1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#2c5f7c";
+  ctx.beginPath();
+  ctx.arc(ex, ey, er, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "rgba(242, 240, 230, 0.8)";
+  ctx.beginPath();
+  ctx.ellipse(ex - er * 0.3, ey - er * 0.25, er * 0.55, er * 0.2, -0.4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(ex + er * 0.25, ey + er * 0.3, er * 0.4, er * 0.15, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function donusSecimCiz(ctx, w, h, d) {
+  yildizOrgu(ctx, w, h);
+  // Dünya sağ üstte yakınlaşır, hafif nefes alır
+  const er = 120 + Math.sin(d.stt * 1.4) * 5;
+  donusDunyaCiz(ctx, w - 210, h - 200, er);
+  // kapsül beklemede
+  const cx = 260 + Math.sin(d.stt * 1.1) * 6;
+  const cy = 150 + Math.cos(d.stt * 0.9) * 8;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(Math.PI / 5);
+  ctx.fillStyle = "#f2f0e6";
+  ctx.beginPath();
+  ctx.moveTo(0, -12);
+  ctx.quadraticCurveTo(13, -4, 9, 10);
+  ctx.quadraticCurveTo(0, 14, -9, 10);
+  ctx.quadraticCurveTo(-13, -4, 0, -12);
+  ctx.fill();
+  ctx.fillStyle = "#F2C130";
+  ctx.fillRect(-9, 1, 18, 4);
+  ctx.restore();
+  // yaklaşma izi
+  ctx.strokeStyle = "rgba(242, 240, 230, 0.25)";
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 9]);
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.quadraticCurveTo((cx + w - 210) / 2, 20, w - 210, h - 200 - er);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  $("#donus-vy").textContent = "0";
+}
+
+function donusYorungeDunyaCiz(ctx, w, h, d) {
+  yildizOrgu(ctx, w, h);
+  const ex = w - 180, ey = h - 120, er = 150;
+  donusDunyaCiz(ctx, ex, ey, er);
+  // yörünge izi
+  ctx.strokeStyle = "rgba(74, 208, 227, 0.4)";
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([5, 7]);
+  ctx.beginPath();
+  ctx.arc(ex, ey, er + 70, Math.PI * 0.65, Math.PI * 1.95);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  const aci = Math.PI * 0.75 - d.stt * 0.85;
+  const ox = ex + Math.cos(aci) * (er + 70);
+  const oy = ey + Math.sin(aci) * (er + 70);
+  ctx.save();
+  ctx.translate(ox, oy);
+  ctx.rotate(aci - Math.PI / 2);
+  ctx.fillStyle = "#f2f0e6";
+  ctx.beginPath();
+  ctx.moveTo(0, -12);
+  ctx.quadraticCurveTo(13, -4, 9, 10);
+  ctx.quadraticCurveTo(0, 14, -9, 10);
+  ctx.quadraticCurveTo(-13, -4, 0, -12);
+  ctx.fill();
+  ctx.fillStyle = "#F2C130";
+  ctx.fillRect(-9, 1, 18, 4);
+  ctx.restore();
+  // frenleme ızgarası — yavaş yavaş yaklaşıyor
+  $("#donus-vy").textContent = Math.max(0, Math.round(12 - d.stt * 4));
+  if (d.stt > 3) {
+    d.durum = "dusus"; d.stt = 0;
+    d.x = 380 + rast(-70, 70);
+    d.y = -50; d.vy = 150; d.para = 0;
+    const durum = $("#donus-durum");
+    if (durum) durum.textContent = t("yeniden giriş");
+    saatGuncelle(t("Dünya'ya dönüş — okyanus inişi"));
+  }
+}
 
 function donusKalkisCiz(ctx, w, h, d) {
   yildizOrgu(ctx, w, h);
@@ -1747,26 +1861,23 @@ function donusYolculukCiz(ctx, w, h, d) {
   ctx.beginPath();
   ctx.arc(gx, gy, Math.max(6, gr), 0, Math.PI * 2);
   ctx.fill();
-  // Dünya sağ üstte büyür
+  // Dünya sağ üstte büyür (dunya.png varsa o)
   const ex = w - 130 + p * 36, ey = 110 - p * 46, er = 24 + p * 52;
-  const gl = ctx.createRadialGradient(ex, ey, er * 0.4, ex, ey, er * 2.1);
-  gl.addColorStop(0, "rgba(74, 208, 227, 0.35)");
-  gl.addColorStop(1, "rgba(74, 208, 227, 0)");
-  ctx.fillStyle = gl;
-  ctx.beginPath();
-  ctx.arc(ex, ey, er * 2.1, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#2c5f7c";
-  ctx.beginPath();
-  ctx.arc(ex, ey, er, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "rgba(242, 240, 230, 0.8)";
-  ctx.beginPath();
-  ctx.ellipse(ex - er * 0.3, ey - er * 0.25, er * 0.55, er * 0.2, -0.4, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(ex + er * 0.25, ey + er * 0.3, er * 0.4, er * 0.15, 0.3, 0, Math.PI * 2);
-  ctx.fill();
+  if (p > 0.25) {
+    donusDunyaCiz(ctx, ex, ey, er);
+  } else {
+    const gl = ctx.createRadialGradient(ex, ey, er * 0.4, ex, ey, er * 2.1);
+    gl.addColorStop(0, "rgba(74, 208, 227, 0.35)");
+    gl.addColorStop(1, "rgba(74, 208, 227, 0)");
+    ctx.fillStyle = gl;
+    ctx.beginPath();
+    ctx.arc(ex, ey, er * 2.1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#2c5f7c";
+    ctx.beginPath();
+    ctx.arc(ex, ey, er, 0, Math.PI * 2);
+    ctx.fill();
+  }
   // kapsül eğri yol üzerinde
   const cx = gx + (ex - gx) * p;
   const cy = gy + (ey - gy) * p - Math.sin(p * Math.PI) * 64;
@@ -1783,12 +1894,8 @@ function donusYolculukCiz(ctx, w, h, d) {
   ctx.restore();
   $("#donus-vy").textContent = Math.round(p * 11);
   if (d.stt > 3) {
-    d.durum = "dusus"; d.stt = 0;
-    d.x = 380 + rast(-70, 70);
-    d.y = -50; d.vy = 190; d.para = 0;
-    const durum = $("#donus-durum");
-    if (durum) durum.textContent = t("yeniden giriş");
-    saatGuncelle(t("Dünya'ya dönüş — okyanus inişi"));
+    d.durum = "secim"; d.stt = 0;
+    donusSecimAc();
   }
 }
 
@@ -1873,6 +1980,8 @@ function donusCiz(dt) {
   if (d.durum === "kalkis") { donusKalkisCiz(ctx, w, h, d); return; }
   if (d.durum === "yorunge") { donusYorungeCiz(ctx, w, h, d); return; }
   if (d.durum === "yolculuk") { donusYolculukCiz(ctx, w, h, d); return; }
+  if (d.durum === "secim") { donusSecimCiz(ctx, w, h, d); return; }
+  if (d.durum === "yorungeDunya") { donusYorungeDunyaCiz(ctx, w, h, d); return; }
 
   const hedefDeniz = h - 150;
   const irtifa = Math.max(0, hedefDeniz - d.y);
@@ -1907,7 +2016,7 @@ function donusCiz(dt) {
   if (d.durum === "dusus") {
     const cer = Math.min(dt, 0.05);
     d.vy += 28 * cer;
-    if (!d.para && irtifa < hedefDeniz * 0.55) {
+    if (!d.para && irtifa < hedefDeniz * (d.secim === "bodoslama" ? 0.28 : 0.6)) {
       d.para = 0.01;
       const durum = $("#donus-durum");
       if (durum) durum.textContent = t("paraşüt açıldı");
@@ -1957,6 +2066,17 @@ function donusCiz(dt) {
   donusKapsulCiz(ctx, d);
   donusParasutCiz(ctx, d);
 
+  // bodoslamada plazma izi
+  if (d.durum === "dusus" && d.secim === "bodoslama" && d.vy > 240) {
+    ctx.fillStyle = "rgba(249, 115, 22, 0.5)";
+    ctx.beginPath();
+    ctx.moveTo(d.x - 10, d.y - 18);
+    ctx.lineTo(d.x + 10, d.y - 18);
+    ctx.lineTo(d.x + 4, d.y - 64 - rng() * 30);
+    ctx.lineTo(d.x - 4, d.y - 64 - rng() * 30);
+    ctx.fill();
+  }
+
   if (d.durum !== "dusus") {
     // dalgalara otur
     ctx.save();
@@ -1981,10 +2101,11 @@ function donusCiz(dt) {
   // suya çarpma patlaması
   if (d.durum === "atisma" && d.atisma < 0.9) {
     const p = d.atisma;
+    const pat = d.secim === "bodoslama" ? 1.5 : 1;
     ctx.fillStyle = "rgba(242, 240, 230, " + (0.85 - p).toFixed(3) + ")";
     for (let i = 0; i < 14; i++) {
       const aci = -Math.PI / 2 + (i - 6.5) * 0.16;
-      const mesafe = 20 + p * 90 * (0.6 + (i % 4) * 0.18);
+      const mesafe = (20 + p * 90 * (0.6 + (i % 4) * 0.18)) * pat;
       const px = d.x + Math.cos(aci) * mesafe * 0.7;
       const py = d.y + 20 + Math.sin(aci) * mesafe;
       ctx.beginPath();
@@ -2013,11 +2134,35 @@ function donusKur() {
   const c = $("#donus-kanvas");
   const btn = $("#btn-rapor-ac");
   if (btn) btn.addEventListener("click", () => { ses("tik"); donusBitir(); });
+  const byG = $("#btn-yorunge-gir");
+  if (byG) byG.addEventListener("click", () => donusSecimSec("yorunge"));
+  const bb = $("#btn-bodoslama");
+  if (bb) bb.addEventListener("click", () => donusSecimSec("bodoslama"));
   if (c) c.addEventListener("pointerdown", (e) => {
     e.preventDefault();
     if (G.faz !== "donus") return;
     donusBitir(); // her aşamada atlanabilir
   });
+}
+
+function donusSecimSec(secim) {
+  const d = G.donus;
+  if (G.faz !== "donus" || d.durum !== "secim") return;
+  d.secim = secim;
+  const panel = $("#donus-secim");
+  if (panel) panel.hidden = true;
+  const durum = $("#donus-durum");
+  if (secim === "yorunge") {
+    d.durum = "yorungeDunya"; d.stt = 0;
+    if (durum) durum.textContent = t("yörüngede frenleme");
+  } else {
+    d.durum = "dusus"; d.stt = 0;
+    d.x = 380 + rast(-70, 70);
+    d.y = -50; d.vy = 340; d.para = 0;
+    if (durum) durum.textContent = t("bodoslama — yüksek hız");
+    saatGuncelle(t("Dünya'ya dönüş — okyanus inişi"));
+  }
+  ses("tik");
 }
 
 /* ============ ROVER ============ */

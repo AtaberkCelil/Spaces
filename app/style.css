@@ -1685,6 +1685,31 @@ body {
 .donus-alt[hidden] { display: none; }
 #donus-kanvas { cursor: pointer; }
 
+.donus-secim {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  border: 2px solid var(--sari);
+  border-radius: 10px;
+  padding: 12px 18px;
+  background: rgba(242, 193, 48, 0.08);
+  margin-bottom: 10px;
+}
+
+.donus-secim[hidden] { display: none; }
+
+.donus-secim p {
+  margin: 0;
+  font-family: var(--fd);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--sari);
+}
+
+.donus-secim-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
 .rapor h2 {
   font-family: var(--fd);
   font-size: 30px;

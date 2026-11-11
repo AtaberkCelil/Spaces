@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=13">
+  <link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
   <div class="kapsa">
@@ -205,6 +205,13 @@
           <span class="hud-ipucu" data-en="mission dossier arrives after splashdown">suya indikten sonra görev raporu gelir</span>
         </div>
         <div class="donus-alt">
+          <div class="donus-secim" id="donus-secim" hidden>
+            <p id="donus-secim-soru" data-en="Earth is ahead. How do we go in?">Dünya karşıda. Nasıl gireceğiz?</p>
+            <div class="donus-secim-btns">
+              <button class="btn" id="btn-yorunge-gir" type="button" data-en="Enter orbit — slow descent">Yörüngeye gir — yavaş iniş</button>
+              <button class="btn ana" id="btn-bodoslama" type="button" data-en="Headfirst — direct entry">Bodoslama — direkt giriş</button>
+            </div>
+          </div>
           <button class="btn ana" id="btn-rapor-ac" type="button" hidden data-en="Open mission dossier →">Görev raporunu aç →</button>
         </div>
       </section>
@@ -374,6 +381,6 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-  <script type="module" src="game.js?v=13"></script>
+  <script type="module" src="game.js?v=14"></script>
 </body>
 </html>
