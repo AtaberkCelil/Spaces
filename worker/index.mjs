@@ -46,6 +46,7 @@ const makeElement = () => ({
   children: [],
   value: "",
   checked: false,
+  dataset: {},
   classList: classListStub(),
   setAttribute: noop,
   removeAttribute: noop,
