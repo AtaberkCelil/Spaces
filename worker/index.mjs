@@ -304,6 +304,13 @@ export default {
       return json({ ok: true, score, rows });
     }
 
-    return env.ASSETS.fetch(request);
+    const assetRes = await env.ASSETS.fetch(request);
+    const assetHeaders = new Headers(assetRes.headers);
+    assetHeaders.set("cache-control", "no-store");
+    return new Response(assetRes.body, {
+      status: assetRes.status,
+      statusText: assetRes.statusText,
+      headers: assetHeaders,
+    });
   },
 };
