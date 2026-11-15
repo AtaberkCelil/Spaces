@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Spaces — Görev Tasarım </title>
+  <meta name="description" content="NASA Space Apps mücadelesi için Spaces: görev tasarım simülatörü — aracı tasarla, fırlat, Ay'a in, yüzey bilimi yap ve veriyi eve ulaştır.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=21">
+</head>
+<body>
+  <div class="kapsa">
+    <header class="ust">
+      <div class="ust-baslik">
+        <img src="assets/ay.png" alt="" width="34" height="33">
+        <h1>Spaces</h1>
+        <span class="ust-alt" data-en="mission design simulator">görev tasarım simülatörü</span>
+      </div>
+      <div class="ust-saat" id="gorev-saat" aria-label="görev saati">—</div>
+    </header>
+
+    <div class="kaynaklar" id="kaynaklar">
+      <span><b data-en="Budget">Bütçe</b> <em class="tabular" id="kn-butce">40,0 M$</em></span>
+      <span><b data-en="Mass">Kütle</b> <em class="tabular" id="kn-kutle">0 / 0 kg</em></span>
+      <span><b data-en="Power">Güç</b> <em class="tabular" id="kn-guc">0 /söl</em></span>
+      <span><b data-en="Fuel">Yakıt</b> <em class="tabular" id="kn-yakit">0</em></span>
+      <span><b data-en="Science">Bilim</b> <em class="tabular" id="kn-bilim">0</em></span>
+    </div>
+
+    <main>
+      <!-- ANA MENÜ -->
+      <section class="ekran acik menu-ekran" id="ekran-baslangic" aria-label="Spaces ana menü">
+        <div class="menu-sahne" aria-hidden="true">
+          <div class="ms-yildiz"></div>
+          <div class="ms-nebula"></div>
+          <div class="ms-yorbit ms-yorbit-1"></div>
+          <div class="ms-yorbit ms-yorbit-2"></div>
+          <div class="ms-yorbit ms-yorbit-3"></div>
+          <div class="ms-gezegen ms-gunes"></div>
+          <div class="ms-gezegen ms-dunya"></div>
+          <div class="ms-gezegen ms-saturn"></div>
+          <div class="ms-gezegen ms-jupiter"></div>
+          <div class="ms-gezegen ms-mars"></div>
+          <div class="ms-gezegen ms-merkur"></div>
+          <div class="ms-gezegen ms-venus"></div>
+          <div class="ms-ay"></div>
+          <div class="ms-roket"><i></i></div>
+          <div class="ms-zemin"></div>
+        </div>
+        <div class="menu-kutu">
+          <div class="menu-ust">
+            <span class="menu-etiket">SPACES–1</span>
+            <span class="menu-for" data-en="mission design simulator">görev tasarım simülatörü</span>
+          </div>
+          <h1 class="menu-logo"><span>SPACE</span><span class="logo-son">S</span></h1>
+          <p class="menu-tag" data-en="Catch the launch window.<br>Save the landing.<br>Get the data home.">Fırlatma penceresini yakala.<br>İnişi kurtar.<br>Veriyi eve ulaştır.</p>
+          <div class="menu-butonlar">
+            <button class="btn ana menu-buton" id="btn-giris" type="button" data-en="START MISSION →">GÖREVE BAŞLA →</button>
+            <button class="btn menu-buton" id="btn-official" type="button">OFFICIAL CHALLENGE</button>
+            <button class="btn menu-buton" id="btn-account" type="button" data-en="ACCOUNT — sign in">HESAP — giriş yap</button>
+            <button class="btn menu-buton" id="btn-leaderboard" type="button" data-en="LEADERBOARD">LİDERLİK</button>
+            <button class="btn menu-buton" id="btn-nasil" type="button" data-en="HOW TO PLAY">NASIL OYNANIR</button>
+            <button class="btn menu-buton" id="btn-rekor" type="button" data-en="BADGES & RECORDS">REKORLAR</button>
+            <button class="btn menu-buton" id="btn-dil" type="button">ENGLISH →</button>
+          </div>
+          <div class="menu-rekor tabular"><span data-en="best mission score">en iyi görev puanı</span><b id="menu-rekor-deger">—</b></div>
+          <button class="menu-link" id="btn-kayit-sil" type="button" data-en="clear saved records">kayıtları temizle</button>
+        </div>
+
+        <div class="menu-popup" id="nasil" role="dialog" aria-label="nasıl oynanır" hidden>
+          <div class="menu-popup-alim">
+            <h2 data-en="How to play">Nasıl oynanır</h2>
+            <ol data-en="<li><b>Briefing</b> — pick a mission; target, body and environment change every run.</li><li><b>Design</b> — balance budget, mass and power; without an antenna, data never flies.</li><li><b>Launch</b> — catch the window: first click arms the countdown, second click fires.</li><li><b>Landing</b> — W = full thrust, S = half thrust, A/D = side thrust; out of fuel, the game ends.</li><li><b>Surface</b> — run instruments through the sols, transmit data to Earth.</li><li><b>Rover</b> — drive with A/D, collect data, power, metal/crystal/ice.</li><li><b>Workshop</b> — turn gathered resources into spare batteries, a fuel converter and engine tunes.</li>">
+              <li><b>Brifing</b> seç — her koşuda hedef, hedef gök cismi ve ortam değişir.</li>
+              <li><b>Tasarım</b> — bütçe, kütle ve güç dengesini kur; anten olmadan veri uçmaz.</li>
+              <li><b>Fırlatma</b> — pencereyi yakala: ilk tık geri sayım, ikinci tık ateştir.</li>
+              <li><b>İniş</b> — W = tam itki, S = yarım itki, A/D = yan itki; yakıt biterse oyun biter.</li>
+              <li><b>Yüzey</b> — söl boyunca cihazları çalıştır, veriyi Dünya'ya ilet.</li>
+              <li><b>Rover</b> — A/D ile sür, veri, güç ve metal/kristal/buz topla.</li>
+              <li><b>Atölye</b> — topladığın kaynaklarla yedek pil, yakıt dönüştürücü ve motor ayarı üret.</li>
+            </ol>
+            <p class="menu-ipucu" data-en="Score: launch accuracy + landing accuracy + science gathered + budget economy + briefing reward.">Puan: fırlatma hassasiyeti + iniş hassasiyeti + toplanan bilim + bütçe ekonomisi + brifing ödülü.</p>
+            <button class="btn ana" id="btn-nasil-kapat" type="button" data-en="Got it →">Anladım →</button>
+          </div>
+        </div>
+
+        <div class="menu-popup" id="rekorlar-popup" role="dialog" aria-label="rozetler ve rekorlar" hidden>
+          <div class="menu-popup-alim">
+            <h2 data-en="Mission badges">Görev rozetleri</h2>
+            <div class="rekor-rozetler">
+              <div class="rekor-rozet"><img src="assets/rozet_inis.png" alt=""><span data-en="First landing">İlk iniş</span></div>
+              <div class="rekor-rozet"><img src="assets/rozet_sol.png" alt=""><span data-en="10 sols">10 söl</span></div>
+              <div class="rekor-rozet"><img src="assets/rozet_bagis.png" alt=""><span data-en="100+ data">100+ veri</span></div>
+              <div class="rekor-rozet"><img src="assets/rozet_s.png" alt=""><span data-en="Class S">S sınıfı</span></div>
+            </div>
+            <p data-en="Badges are earned in the report: landing successfully, completing the full sol plan, transmitting 100+ units of data, and an S grade.">Rozetler raporda kazanılır: başarıyla binmek, eksiksiz söl planını tamamlamak, 100+ birim veri iletmek ve S sınıfı not.</p>
+            <button class="btn ana" id="btn-rekorlar-kapat" type="button" data-en="Close">Kapat</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- GÖREV BRİFİNGİ -->
+      <section class="ekran brif-ekran" id="ekran-brif" aria-label="görev brifingi">
+        <div class="brif-ic">
+          <div class="brif-ust">
+            <button class="btn btn-nokta" id="btn-brif-menu" type="button" data-en="← Menu">← Menü</button>
+            <div class="brif-ust-metin">
+              <span class="brif-ust-cizelge" data-en="game menu">oyun menüsü</span>
+              <h2 data-en="Mission <em>Briefing</em>">Görev <em>Brifingi</em></h2>
+              <p data-en="target • body • environment">hedef • gök cismi • ortam</p>
+            </div>
+            <p class="giris-not tabular" id="rekor-satir" hidden data-en="Best score: <b id='rekor-deger'>—</b>">En iyi puan: <b id="rekor-deger">—</b></p>
+          </div>
+          <div class="gorev-liste" id="gorev-liste" role="radiogroup" aria-label="görev seçimi"></div>
+          <div class="brif-alt">
+            <p class="brif-aciklama" data-en="Missions are picked from the list; you can't change the briefing once you move to design.">Her görev listeden seçilir; tasarıma geçtikten sonra brifingi değiştiremezsin.</p>
+            <button class="btn ana" id="btn-brif-tasarim" type="button" disabled data-en="To design →">Tasarıma geç →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TASARIM -->
+      <section class="ekran" id="ekran-tasarim" aria-label="görev tasarımı">
+        <div class="montaj-ekran">
+          <div class="montaj-merkez">
+            <canvas id="montaj-kanvas" width="560" height="520" aria-label="araç montaj önizlemesi"></canvas>
+          </div>
+          <div class="kart brif-kart" id="brif-kart" hidden>
+            <div class="brif-ust">
+              <span class="gorev-kod" id="brif-kod">—</span>
+              <h3 id="brif-ad">—</h3>
+              <span class="gorev-zorluk" id="brif-zorluk">—</span>
+            </div>
+            <p class="brif-hedef" id="brif-hedef">—</p>
+            <p class="brif-gok-cisim"><img id="brif-gok-cisim" src="" alt="" width="28" height="28"><span id="brif-gok-cisim-yazi">—</span></p>
+            <ul class="brif-modlar" id="brif-modlar"></ul>
+            <button class="onerilen-toggle" id="btn-onerilen" type="button" data-en="Suggested kit ▸">Önerilen kit ▸</button>
+            <div class="onerilen-liste" id="onerilen-liste" hidden></div>
+          </div>
+          <div class="montaj-sol-ust">
+            <h2 class="bolum-baslik" data-en="Launch vehicle">Fırlatma aracı</h2>
+            <div class="arac-liste" id="arac-liste" role="radiogroup" aria-label="fırlatma aracı seçimi"></div>
+          </div>
+          <div class="montaj-sag-ust">
+            <h2 class="bolum-baslik" data-en="Landing module">İniş modülü</h2>
+            <div class="arac-liste kucuk" id="modul-liste" role="radiogroup" aria-label="iniş modülü seçimi"></div>
+          </div>
+          <div class="montaj-alt-dock">
+            <div class="montaj-sol-alt">
+              <h2 class="bolum-baslik" data-en="Science payload">Bilim yükü</h2>
+              <div class="donanim-liste" id="donanim-liste"></div>
+            </div>
+            <div class="tasarim-alt">
+              <p class="durum tabular" id="tasarim-durum" aria-live="polite" data-en="Pick a launch vehicle.">Bir fırlatma aracı seç.</p>
+              <button class="btn ana" id="btn-tasarim-onay" type="button" disabled data-en="To launch →">Fırlatmaya geç →</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FIRLATMA -->
+      <section class="ekran" id="ekran-firlatma" aria-label="fırlatma">
+        <div class="kanvas-cerceve">
+          <canvas id="firlatma-kanvas" width="880" height="480" tabindex="0" aria-label="fırlatma zamanlama göstergesi"></canvas>
+        </div>
+        <div class="mini-mudahale">
+          <p id="firlatma-yazi" aria-live="polite" data-en="The colored window is as wide as your rocket's reliability. Press SPACE (or tap) to launch.">Renkli pencere araç güvenilirliği kadar geniş. Boşluk tuşu (ya da dokun) ile fırlat.</p>
+          <button class="btn ana" id="btn-firlat" type="button" data-en="LAUNCH">FIRLAT</button>
+        </div>
+      </section>
+
+      <!-- SEYİR -->
+      <section class="ekran" id="ekran-seyir" aria-label="yörünge seyri">
+        <div class="kanvas-cerceve">
+          <canvas id="seyir-kanvas" width="880" height="480" aria-label="Dünya–Ay seyri"></canvas>
+        </div>
+        <div class="kart karar" id="seyir-karar" hidden>
+          <h3 data-en="Course correction burn">Seyir düzeltme yakılandırması</h3>
+          <p id="seyir-karar-metin">Ay'ın çekimine doğru yörünge çıkmak için arabulucu yakıt atışı gerekiyor.</p>
+          <div class="karar-dugmeleri">
+            <button class="btn ana" id="btn-seyir-yakit" type="button" data-en="−3 fuel · landing accuracy ↑, cruise secured">−3 yakıt · iniş hassasiyeti ↑, seyir güvence</button>
+            <button class="btn" id="btn-seyir-risk" type="button" data-en="Save fuel · enough for landing, cruise is risky">Yakıt biriktir · inişe yeterli, seyir riskli</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- İNİŞ -->
+      <section class="ekran" id="ekran-inis" aria-label="Ay inişi">
+        <div class="kanvas-cerceve">
+          <canvas id="inis-kanvas" width="880" height="560" tabindex="0" aria-label="ay inişi oyunu"></canvas>
+        </div>
+        <div class="inis-hud">
+          <span class="tabular" data-en="descent speed <b id='inis-vy'>0</b> m/s">düş hızı <b id="inis-vy">0</b> m/s</span>
+          <span class="tabular" data-en="lateral speed <b id='inis-vx'>0</b> m/s">yan hız <b id="inis-vx">0</b> m/s</span>
+          <span class="tabular" data-en="fuel <b id='inis-yakit'>0</b>">yakıt <b id="inis-yakit">0</b></span>
+          <span class="hud-ipucu" data-en="W = full thrust · S = half · A/D = side · tap = thrust">W = tam itki · S = yarım · A/D = yan · dokun = itki</span>
+        </div>
+      </section>
+
+      <!-- DÜNYA'YA DÖNÜŞ -->
+      <section class="ekran" id="ekran-donus" aria-label="Dünya'ya dönüş">
+        <div class="kanvas-cerceve">
+          <canvas id="donus-kanvas" width="880" height="560" aria-label="Dünya okyanus inişi"></canvas>
+        </div>
+        <div class="inis-hud">
+          <span class="tabular" data-en="capsule speed <b id='donus-vy'>0</b> m/s">kapsül hızı <b id="donus-vy">0</b> m/s</span>
+          <span class="tabular" id="donus-durum" data-en="re-entry">yeniden giriş</span>
+          <span class="hud-ipucu" data-en="mission dossier arrives after splashdown">suya indikten sonra görev raporu gelir</span>
+        </div>
+        <div class="donus-alt">
+          <div class="donus-secim" id="donus-secim" hidden>
+            <p id="donus-secim-soru" data-en="Earth is ahead. How do we go in?">Dünya karşıda. Nasıl gireceğiz?</p>
+            <div class="donus-secim-btns">
+              <button class="btn" id="btn-yorunge-gir" type="button" data-en="Enter orbit — slow descent">Yörüngeye gir — yavaş iniş</button>
+              <button class="btn ana" id="btn-bodoslama" type="button" data-en="Headfirst — direct entry">Bodoslama — direkt giriş</button>
+            </div>
+          </div>
+          <button class="btn ana" id="btn-rapor-ac" type="button" hidden data-en="Open mission dossier →">Görev raporunu aç →</button>
+        </div>
+      </section>
+
+      <!-- YÜZEY -->
+      <section class="ekran" id="ekran-yuzey" aria-label="yüzey operasyonları">
+        <div class="kanvas-cerceve kisa">
+          <canvas id="yuzey-kanvas" width="880" height="360" aria-label="ay yüzeyi sahnesi"></canvas>
+        </div>
+        <div class="yuzey-izgara">
+          <div class="kart yuzey-genis">
+            <h3 id="yuzey-gunosu">Söl 1</h3>
+            <p class="tabular gun-ozet" id="yuzey-ozet">—</p>
+            <p class="tabular gun-ozet brif-ilerleme" id="yuzey-brif">—</p>
+            <div class="guc-cubugu" aria-label="pil durumu">
+              <div id="yuzey-pil" class="guc-cubugu-ic"></div>
+            </div>
+            <p class="tabular" id="yuzey-pil-yazi">—</p>
+            <div class="rover-hud tabular" id="rover-hud">Rover · pil 60 · veri 0 · 0 m</div>
+            <div class="kaynak-hud tabular" id="kaynak-hud">Kaynaklar · metal 0 · kristal 0 · buz 0</div>
+            <div class="uzay-hava tabular" id="uzay-hava">
+              <span class="uh-rozet tabular" id="uh-rozet">SAKNİK</span>
+              <span class="uh-govde">
+                <b class="uh-mesaj" id="uh-mesaj">Uzay hava: sakin — etkin baryumu.</b>
+                <i class="uh-yagis tabular" id="uh-yagis">yağış: yok</i>
+              </span>
+            </div>
+            <div class="rover-kontrol">
+              <button class="btn" id="btn-rover-sol" type="button" aria-label="rover geri" data-en="◀ back">◀ geri</button>
+              <button class="btn" id="btn-rover-sag" type="button" aria-label="rover ileri" data-en="forward ▶">ileri ▶</button>
+              <span class="rover-ipucu" data-en="Drive with A/D or ←/→">A/D veya ←/→ ile sür</span>
+            </div>
+            <p class="not rover-durum" id="rover-durum">Rover hazır — yüzeyde veri ve güç hücresi ara.</p>
+          </div>
+          <div class="kart">
+            <h3 data-en="Instruments">Enstrümanlar</h3>
+            <div class="cihaz-gecisleri" id="cihaz-gecisleri"></div>
+          </div>
+          <div class="kart">
+            <h3 data-en="Operations">Operasyon</h3>
+            <div class="islem-dugmeleri">
+              <button class="btn" id="btn-sol-basyaz" type="button" data-en="Start sol →">Sölü başlat →</button>
+              <button class="btn" id="btn-yuzey-veri" type="button" data-en="Transmit data to Earth">Veriyi Dünya'ya gönder</button>
+              <button class="btn" id="btn-atolye" type="button" data-en="Workshop · build">Atölye · üretim</button>
+              <button class="btn" id="btn-gezegen" type="button" data-en="Interplanetary flight →">Gezegenler arası uçuş →</button>
+            </div>
+            <p class="not" data-en="The data buffer fills up; without an antenna, only half counts at mission end.">Veri tamponun doluyor; anten olmazsa görev sonu yarısı sayılır.</p>
+          </div>
+        </div>
+        <p class="surec tabular" id="yuzey-gunluk" aria-live="polite" data-en="You made it to the surface. Run the instruments, transmit the data.">Yüzeye sağ çıktın. Enstrümanları çalıştır, veriyi ilet.</p>
+
+        <div class="gezegen-popup" id="gezegen-popup" role="dialog" aria-modal="true" aria-label="gezegenler arası uçuş" hidden>
+          <div class="gezegen-popup-alim">
+            <h2 data-en="Interplanetary flight">Gezegenler arası uçuş</h2>
+            <p data-en="Move the rover and module to another body. Every flight costs fuel and base power; you supply power with cells collected by the rover. Remaining fuel must also cover the landing. Untransmitted buffer data is lost in flight. New data and power cells await on the destination surface.">Rover'ı ve modülü başka bir gök cismine taşı. Her uçuş yakıt ve üs gücü harcar; gücü rover ile topladığın hücrelerden sağlarsın. Kalan yakıtın inişe de yetmesi gerekir. Tampondaki iletilmemiş veri uçuşta kaybolur. Varışta yeni yüzeyde veri ve güç hücreleri seni bekler.</p>
+            <div class="gezegen-liste" id="gezegen-liste"></div>
+            <button class="btn" id="btn-gezegen-kapat" type="button" data-en="Cancel">Vazgeç</button>
+          </div>
+        </div>
+
+        <div class="atolye-popup" id="atolye-popup" role="dialog" aria-modal="true" aria-label="atölye" hidden>
+          <div class="atolye-alim">
+            <h2 data-en="Workshop">Atölye</h2>
+            <p data-en="Use the resources the rover gathered to upgrade your rocket. Resources renew on new sols and planets.">Rover ile topladığın kaynakları roketini güçlendirmek için kullan. Kaynaklar yeni söllerde ve gezegenlerde yenilenir.</p>
+            <div class="kaynak-envanter" id="atolye-envanter"></div>
+            <div class="uretim-liste" id="atolye-liste"></div>
+            <div class="donusturucu-kutu" id="atolye-donusturucu" hidden>
+              <h3 data-en="Fuel Converter">Yakıt Dönüştürücü</h3>
+              <p data-en="1 ice + 1 metal → 4 fuel">1 buz + 1 metal → 4 yakıt</p>
+              <button class="btn" id="btn-yakit-uret" type="button" data-en="Make fuel">Yakıt üret</button>
+            </div>
+            <button class="btn" id="btn-atolye-kapat" type="button" data-en="Close">Kapat</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RAPOR -->
+      <section class="ekran" id="ekran-rapor" aria-label="görev raporu">
+        <div class="kart rapor">
+          <div class="rapor-stamp" id="rapor-stamp" hidden><img id="rapor-stamp-img" alt="görev sonucu"></div>
+          <h2 id="rapor-baslik" data-en="Spaces — Mission Report">Görev raporu</h2>
+          <div class="rapor-nota">
+            <span class="nota-buyuk" id="rapor-nota">—</span>
+            <span class="nota-yan" id="rapor-ozet">—</span>
+          </div>
+          <table class="rapor-tablo" id="rapor-tablo">
+            <tbody id="rapor-govde"></tbody>
+          </table>
+          <div class="rapor-rozetler" id="rapor-rozetler" hidden></div>
+          <div class="rapor-bolum" id="rapor-iletim" hidden>
+            <h3 data-en="TRANSMISSION SUMMARY · DATA SENT TO EARTH">DÜNYA'YA GİDEN VERİ ÖZETİ</h3>
+            <ul id="rapor-iletim-liste" class="rapor-iletim-liste"></ul>
+          </div>
+          <div class="rapor-bolum" id="rapor-kayit" hidden>
+            <h3 data-en="DAILY LOG · WHAT HAPPENED EACH SOL">GÜN GÜN KAYIT · O GÜN NE OLDU</h3>
+            <div id="rapor-kayit-liste" class="rapor-kayit-liste"></div>
+          </div>
+          <div class="rapor-challenge" id="rapor-challenge" hidden>
+            <p id="rapor-challenge-msg" data-en="This result enters the Official Challenge.">Bu sonuç Official Challenge’a girer.</p>
+            <button class="btn ana" id="btn-lider-kaydet" type="button" data-en="Save Official Score →">Resmi Skoru Kaydet →</button>
+          </div>
+          <div class="rapor-alt">
+            <button class="btn ana" id="btn-yeni-gorev" type="button" data-en="New mission →">Yeni görev →</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="leaderboard-popup" id="leaderboard-popup" role="dialog" aria-modal="true" hidden>
+      <div class="leaderboard-popup-alim">
+        <div class="lb-ust">
+          <h2 data-en="ACCOUNT · LEADERBOARD">HESAP · LİDERLİK</h2>
+          <button class="lb-close" id="leaderboard-close" type="button" aria-label="kapat">×</button>
+        </div>
+
+        <div class="lb-grid">
+          <section class="lb-account">
+            <div id="auth-out" class="auth-panel">
+              <p data-en="Official scores are saved to your Google account and the unique name you choose.">Resmi skorlar Google hesabına ve seçtiğin benzersiz isme kaydedilir.</p>
+              <button class="btn ana" id="btn-google-signin" type="button" data-en="Sign in with Google">Google ile giriş yap</button>
+            </div>
+
+            <div id="auth-in" class="auth-panel hidden">
+              <div class="auth-user">
+                <div class="auth-avatar" id="auth-avatar"></div>
+                <div class="auth-user-text">
+                  <b id="auth-name">—</b>
+                  <span id="auth-email">—</span>
+                </div>
+              </div>
+
+              <form id="display-name-form" class="display-name-form hidden">
+                <label class="alias-label" for="display-name-input" data-en="Unique name">Benzersiz isim</label>
+                <input class="alias-input" id="display-name-input" name="display_name" maxlength="24" autocomplete="nickname" autocapitalize="none" autocorrect="off" required>
+                <button type="submit" class="btn ana" data-en="Save name">İsmi kaydet</button>
+              </form>
+
+              <p id="display-name-summary" class="auth-displayname hidden" data-en="Unique name: <b id='display-name-value'></b> <button class='btn small' id='btn-displayname-edit' type='button'>edit</button>">Benzersiz isim: <b id="display-name-value"></b>
+                <button class="btn small" id="btn-displayname-edit" type="button" data-en="edit">değiştir</button></p>
+
+              <p id="auth-error" class="auth-error" aria-live="polite"></p>
+              <button class="btn" id="btn-signout" type="button" data-en="Sign out">Çıkış yap</button>
+            </div>
+
+            <section class="lb-save">
+              <h3 data-en="OFFICIAL SCORE">RESMİ SKOR</h3>
+              <p id="lb-save-msg" data-en="Sign in with Google and pick a name to save your Official Challenge result.">Official Challenge sonucunu kaydetmek için Google ile giriş yap ve isim seç.</p>
+              <div class="turnstile-wrap" id="turnstile-container"></div>
+              <button class="btn ana" id="btn-save-official" type="button" disabled data-en="Save Official Score →">Resmi Skoru Kaydet →</button>
+            </section>
+          </section>
+
+          <section class="lb-board">
+            <h3>TOP 20</h3>
+            <ol id="leaderboard-items" class="leaderboard-list"></ol>
+          </section>
+        </div>
+      </div>
+    </div>    </div>
+
+    <footer class="alt-not tabular">
+      <span data-en="Spaces · NASA Space Apps challenge · Team Menecigi">Spaces · NASA Space Apps mücadelesi · Menecigi takımı</span>
+  </div>
+  <script>
+    window.SUPABASE_URL = "https://ywrvktfwrmxcqjzqypdh.supabase.co";
+    window.SUPABASE_ANON_KEY = "sb_publishable_YZUcp8sCv6qauDQ8qxwnyw_PIJVv5uO";
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script type="module" src="game.js?v=21"></script>
+</body>
+</html>
