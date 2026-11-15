@@ -2,6 +2,8 @@
 
 NASA Space Apps için uçtan uca bir uzay görevi tasarım oyunu. Brifingi seç, fırlatma aracını ve bilim yükünü tasarla, fırlatma penceresini yakala, inişi kurtar, yüzeyde bilim yap ve veriyi Dünya'ya ulaştır.
 
+**Oynamak için:** [nasa.ataberk.dev](https://nasa.ataberk.dev)
+
 ## Çalıştırma
 
 ```bash
