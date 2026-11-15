@@ -1,4 +1,4 @@
-/* MenSpace — görev tasarım simülatörü
+/* Spaces — görev tasarım simülatörü
    fazlar: tasarım → fırlatma → seyir → iniş → yüzey → rapor        */
 "use strict";
 
@@ -231,7 +231,7 @@ const EN = {
   "Üs gücü yetersiz — rover ile güç hücresi toplayıp {0} birime ulaş.": "Not enough base power — collect power cells with the rover to reach {0}.",
   " yolculuğu — ": " voyage — ", " yakıt, ": " fuel, ", " güç harcandı": " power spent",
   /* rapor */
-  "MenSpace — Görev Raporu": "MenSpace — Mission Report",
+  "Spaces — Görev Raporu": "Spaces — Mission Report",
   "Atlatılan geceler": "Nights survived",
   "Uzay hava olayları": "Space weather events",
   " söl etkilenendi": " sols affected",
@@ -269,7 +269,7 @@ const EN = {
   "Görev brifingi": "Mission briefing",
   "TOPLAM": "TOTAL", "başarılı iniş": "successful landing", "görev kayıp": "mission lost",
   "başarılı iniş": "successful landing", "tam plan": "full plan", "100+ veri": "100+ data", "S sınıfı": "Class S",
-  "MenSpace — görev tasarım simülatörü": "MenSpace — mission design simulator",
+  "Spaces — görev tasarım simülatörü": "Spaces — mission design simulator",
   "görev tasarım simülatörü": "mission design simulator",
   "Önerilen kit": "Suggested kit",
   /* hesap / liderlik */
@@ -320,7 +320,7 @@ const tf = (s, ...args) => {
 function htmlDiliUygula() {
   document.documentElement.lang = LANG === "en" ? "en" : "tr";
   if (LANG !== "en") return;
-  document.title = "MenSpace — Mission Design";
+  document.title = "Spaces — Mission Design";
   document.querySelectorAll("[data-en]").forEach((el) => {
     el.innerHTML = el.getAttribute("data-en");
   });
@@ -3126,7 +3126,7 @@ function raporaGec(baslik, ozet, kaynak) {
   else if (puan >= 15)  nota = "D";
   else nota = "F";
 
-  $("#rapor-baslik").textContent = t("MenSpace — Görev Raporu");
+  $("#rapor-baslik").textContent = t("Spaces — Görev Raporu");
   $("#rapor-nota").textContent = nota;
   const toplam = basarili ? say(puan, 0) : null;
   $("#rapor-ozet").textContent = basarili

@@ -1,50 +1,67 @@
-# MenSpace — Görev Tasarım Simülatörü
+# Spaces — Görev Tasarım Simülatörü
 
-NASA Space Apps için hazırlanmış, uçtan uca bir uzay görevi tasarlama oyunu. Fırlatma aracından bilime, inişten yüzey operasyonlarına kadar her karar görev sonucunu etkiler.
+NASA Space Apps için uçtan uca bir uzay görevi tasarım oyunu. Brifingi seç, fırlatma aracını ve bilim yükünü tasarla, fırlatma penceresini yakala, inişi kurtar, yüzeyde bilim yap ve veriyi Dünya'ya ulaştır.
 
 ## Çalıştırma
 
 ```bash
-# yerel önizleme (kimlik doğrulama çalışmaz)
-python3 -m http.server 8899 --directory app
+# yerel D1 şeması (ilk sefer)
+npx wrangler d1 execute DB --local --file worker/schema.sql
 
-# tam geliştirme ortamı (Workers + D1)
+# tam geliştirme ortamı (Workers + D1 + statik arayüz)
 npx wrangler dev --port 8789
 ```
 
+Tarayıcıdan `http://localhost:8789` açılır. `.dev.vars` içinde `SESSION_SECRET` ve `CHALLENGE_SECRET` bulunur.
+
 ## Oyun modları
 
-- **Serbest görev:** rastgele brifing ve hedef gök cismi; sonuç yalnızca yerel rekor (`localStorage`) olarak kaydedilir.
-- **Official Challenge:** sabit seed (`1337`) ile tüm oyunculara aynı görev verilir. Skor sunucu tarafında replay ile doğrulanır ve liderlik tablosunda gösterilir. Google OAuth gerekir.
+- **Serbest görev:** rastgele seed ile brifing; sonuç yalnızca yerel rekor (`localStorage`) olarak kaydedilir.
+- **Resmî görev:** sabit seed (`1337`) ile tüm oyunculara aynı görev. Skor, sunucu tarafında aksiyon replay'i ile yeniden oynatılır ve doğrulanır; hesap gerektirir.
+
+## Hesap ve skor altyapısı
+
+- Supabase/Google bağımlılığı yoktur; her şey Cloudflare D1 üzerindedir.
+- Hesaplar e-posta + şifre (PBKDF2-SHA256, 100k tur), oturumlar HttpOnly çerezle yönetilir.
+- `POST /api/register`, `/api/login`, `/api/logout`, `GET /api/me`, `POST /api/name`
+- `GET /api/challenge` (imzalı, 15 dk geçerli), `GET /api/leaderboard`, `POST /api/submit`
+- `submit`: oturum + imza + saatlik hız limiti (8/IP) + deterministik replay denetimi yapar; puan yalnızca sunucunun kendi simülasyonundan kabul edilir.
 
 ## Kontroller
 
 | İşlem | Tuş |
 |---|---|
-| Fırlatma | `Boşluk` / `W` / `FIRLAT` |
+| Fırlatma | `Boşluk` / `Enter` / FIRLAT |
 | İniş (tam itki) | `W` / `↑` / `Boşluk` |
 | İniş (yarım itki) | `S` / `↓` |
 | İniş (yan itki) | `A` / `←` , `D` / `→` |
-| Yüzey | Enstrümanları işaretle, `Sölü başlat`, `Veriyi Dünya'ya gönder` |
 | Rover | `A` / `←` geri, `D` / `→` ileri |
+| Yüzey | Enstrüman seç, `Sölü çalıştır`, `Şimdi ilet` |
+
+## Puan
+
+Brifing ödülü + fırlatma hassasiyeti + iniş hassasiyeti + bilim (iletilen veri) + bütçe ekonomisi — üst sınır 400. Rozetler: ilk iniş, tüm söller, 100+ veri, S sınıfı.
 
 ## Yapı
 
 ```
 app/
-  index.html   arayüz iskeleti (7 ekran)
-  style.css    tasarım dili (kağıt/mürekkep paleti)
-  game.js      oyun durumu, fazlar, brifing, canvas çizimi, ses
-  assets/      PNG çizimler (64×64 / 128×128)
+  index.html   arayüz iskeleti (8 perde + pencereler)
+  style.css    tasarım dili (kâğıt/mürekkep "görev dosyası" paleti)
+  game.js      giriş modülü (replay ihracı + tarayıcıda ui başlatımı)
+  sim.js       deterministik çekirdek: veri, fizik, puan, replay
+  ui.js        ekranlar, tuval çizimleri, giriş, hesap/liderlik
+  assets/      PNG çizimler
 worker/
-  index.mjs    Cloudflare Workers (auth, leaderboard, challenge API)
+  index.mjs    Cloudflare Workers API (auth, challenge, skor, replay)
+  schema.sql   D1 şeması
 ```
 
-Teknik: saf HTML/CSS/JS + Canvas 2D, harici kütüphane veya build adımı yok.
+Teknik: saf HTML/CSS/JS + Canvas 2D, derleme adımı yok. Oyun çekirdeği (`sim.js`) DOM'dan bağımsızdır; canlı oyunda ve sunucu replay'inde aynı `ADIM = 1/60` sabit adım kullanılır.
 
 ## Katkı
 
-Yeni gezegen, brifing, donanım veya atölye tarifi eklemek için ilgili diziyi `game.js`'de düzenleyin; yeni varlık için `app/assets/` içine şeffaf PNG koyun. Kod değişiklikleri `node --check` ile test edilmeli ve replay deterministik kalmalıdır.
+Yeni gök cismi, brifing, donanım veya atölye tarifi eklemek için `app/sim.js` içindeki veri dizilerini düzenleyin. Kod değişikliklerinde replay determinizmi bozulmamalı; `node --check` ile sözdizimini denetleyin.
 
 ## Lisans
 

@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MenSpace — Görev Tasarım </title>
-  <meta name="description" content="NASA Space Apps mücadelesi için MenSpace: görev tasarım simülatörü — aracı tasarla, fırlat, Ay'a in, yüzey bilimi yap.">
+  <title>Spaces — Görev Tasarım </title>
+  <meta name="description" content="NASA Space Apps mücadelesi için Spaces: görev tasarım simülatörü — aracı tasarla, fırlat, Ay'a in, yüzey bilimi yap ve veriyi eve ulaştır.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=21">
 </head>
 <body>
   <div class="kapsa">
     <header class="ust">
       <div class="ust-baslik">
         <img src="assets/ay.png" alt="" width="34" height="33">
-        <h1>MenSpace</h1>
+        <h1>Spaces</h1>
         <span class="ust-alt" data-en="mission design simulator">görev tasarım simülatörü</span>
       </div>
       <div class="ust-saat" id="gorev-saat" aria-label="görev saati">—</div>
@@ -31,25 +31,30 @@
 
     <main>
       <!-- ANA MENÜ -->
-      <section class="ekran acik menu-ekran" id="ekran-baslangic" aria-label="MenSpace ana menü">
+      <section class="ekran acik menu-ekran" id="ekran-baslangic" aria-label="Spaces ana menü">
         <div class="menu-sahne" aria-hidden="true">
-          <img class="menu-gunes" src="assets/gunes.png" alt="">
-          <img class="menu-venus" src="assets/venus.png" alt="">
-          <img class="menu-mars" src="assets/mars.png" alt="">
-          <img class="menu-merkur" src="assets/merkur.png" alt="">
-          <img class="menu-saturn" src="assets/saturn.png" alt="">
-          <img class="menu-jupiter" src="assets/jupiter.png" alt="">
-          <img class="menu-dunya" src="assets/dunya.png" alt="">
-          <img class="menu-ay" src="assets/ay.png" alt="">
-          <img class="menu-roket" src="assets/roket_orta.png" alt="">
-          <img class="menu-uzay_araci" src="assets/uzay_araci.png" alt="">
+          <div class="ms-yildiz"></div>
+          <div class="ms-nebula"></div>
+          <div class="ms-yorbit ms-yorbit-1"></div>
+          <div class="ms-yorbit ms-yorbit-2"></div>
+          <div class="ms-yorbit ms-yorbit-3"></div>
+          <div class="ms-gezegen ms-gunes"></div>
+          <div class="ms-gezegen ms-dunya"></div>
+          <div class="ms-gezegen ms-saturn"></div>
+          <div class="ms-gezegen ms-jupiter"></div>
+          <div class="ms-gezegen ms-mars"></div>
+          <div class="ms-gezegen ms-merkur"></div>
+          <div class="ms-gezegen ms-venus"></div>
+          <div class="ms-ay"></div>
+          <div class="ms-roket"><i></i></div>
+          <div class="ms-zemin"></div>
         </div>
         <div class="menu-kutu">
           <div class="menu-ust">
-            <span class="menu-etiket">Mens–1</span>
+            <span class="menu-etiket">SPACES–1</span>
             <span class="menu-for" data-en="mission design simulator">görev tasarım simülatörü</span>
           </div>
-          <h1 class="menu-logo"><span>MEN</span><br><span>SPACE</span></h1>
+          <h1 class="menu-logo"><span>SPACE</span><span class="logo-son">S</span></h1>
           <p class="menu-tag" data-en="Catch the launch window.<br>Save the landing.<br>Get the data home.">Fırlatma penceresini yakala.<br>İnişi kurtar.<br>Veriyi eve ulaştır.</p>
           <div class="menu-butonlar">
             <button class="btn ana menu-buton" id="btn-giris" type="button" data-en="START MISSION →">GÖREVE BAŞLA →</button>
@@ -292,7 +297,7 @@
       <section class="ekran" id="ekran-rapor" aria-label="görev raporu">
         <div class="kart rapor">
           <div class="rapor-stamp" id="rapor-stamp" hidden><img id="rapor-stamp-img" alt="görev sonucu"></div>
-          <h2 id="rapor-baslik" data-en="MenSpace — Mission Report">Görev raporu</h2>
+          <h2 id="rapor-baslik" data-en="Spaces — Mission Report">Görev raporu</h2>
           <div class="rapor-nota">
             <span class="nota-buyuk" id="rapor-nota">—</span>
             <span class="nota-yan" id="rapor-ozet">—</span>
@@ -373,7 +378,7 @@
     </div>    </div>
 
     <footer class="alt-not tabular">
-      <span data-en="MenSpace · NASA Space Apps challenge · Team Menecigi">MenSpace · NASA Space Apps mücadelesi · Menecigi takımı</span>
+      <span data-en="Spaces · NASA Space Apps challenge · Team Menecigi">Spaces · NASA Space Apps mücadelesi · Menecigi takımı</span>
   </div>
   <script>
     window.SUPABASE_URL = "https://ywrvktfwrmxcqjzqypdh.supabase.co";
@@ -381,6 +386,6 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-  <script type="module" src="game.js?v=14"></script>
+  <script type="module" src="game.js?v=21"></script>
 </body>
 </html>
